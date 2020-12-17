@@ -45,7 +45,7 @@ def article_to_universal(GT_pos):
 
 
 def stage_1_table_creation(result_dict_so_far, input_path, start_index=1):
-	""" get_data_from_GroundTruth, """
+	""" GT to universal + NLTK POS tagging to universal """
 	sentences_info = transform_golden(istring=input_path, start_index=start_index)
 
 	tokenizer = RevisedTreeBankWordTokenizer()
@@ -63,7 +63,7 @@ def stage_1_table_creation(result_dict_so_far, input_path, start_index=1):
 
 
 def stage_2_adding_spacy_POS(result_dict_so_far):
-	""" this should be run only from the spacy-2 branch"""
+	""" SPACY pos tagging to universal"""
 	nlp_spacy = en_core_web_sm.load()
 	nlp_spacy.tokenizer = RevisedTreeBankWordTokenizerVocab(nlp_spacy.vocab)
 
@@ -77,7 +77,7 @@ def stage_2_adding_spacy_POS(result_dict_so_far):
 
 
 def stage_3_adding_stanza_POS(result_dict_so_far):
-	""" this should be run only from the stanza branch"""
+	""" stanza POS tagging to universal"""
 	nlp_stanza = stanza.Pipeline(lang='en', processors='tokenize,pos', tokenize_pretokenized=True)
 
 	for k in result_dict_so_far.keys():
