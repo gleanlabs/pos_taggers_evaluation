@@ -40,10 +40,15 @@ def split_labels_articles_that_need_to(sent, gt):
     return list(itertools.chain.from_iterable(new_labels))
 
 
+def get_index(sent, sent_tok):
+    return [sent.index(tok) for tok in sent_tok]
+
+
 df_pos = pd.read_csv('sentences_to_GT_POS.csv')
 df_pos['GT'] = df_pos['tagged_tokens_GT'].apply(lambda x: [i[1] for i in ast.literal_eval(x)])
 df_pos['sentence_tok'] = df_pos[['sentence', 'GT']].apply(lambda x: split_tok_articles_that_need_to(x[0], x[1]), axis=1)
 df_pos['GT'] = df_pos[['sentence', 'GT']].apply(lambda x: split_labels_articles_that_need_to(x[0], x[1]), axis=1)
+df_pos['GT_index'] = df_pos[['sentence', 'sentence_tok']].apply(lambda x: get_index(x[0], x[1]), axis=1)
 
 ARTICLE_TO_UNIVERSAL_MAP = dict([
     ("&", "CONJ"), ("$", "NUM"), ("D", "DET"), ("P", "SCONJ/ADP"), ("A", "ADJ"), ("N", "NOUN"),
@@ -68,23 +73,33 @@ UNIVERSAL_MAP = dict([
     ("ADP", "SCONJ/ADP"),
     ("SCONJ", "SCONJ/ADP")
 ])
-# nltk
-df_pos['pos_nltk'] = df_pos['sentence'].apply(lambda x: [pos[1] for pos in nltk.pos_tag(word_tokenize(x))])
-print(df_pos['pos_nltk'])
-df_pos['pos_nltk_univ'] = df_pos['pos_nltk'].apply(
-    lambda x: [PENN_TREEBANK_TO_UNIVERSAL_MAP[pos] if pos in PENN_TREEBANK_TO_UNIVERSAL_MAP else "[UNK]" for pos in
-               x])
-print(df_pos['pos_nltk_univ'])
+# # nltk
+# df_pos['pos_nltk'] = df_pos['sentence'].apply(lambda x: [pos[1] for pos in nltk.pos_tag(word_tokenize(x))])
+# print(df_pos['pos_nltk'])
+# df_pos['pos_nltk_univ'] = df_pos['pos_nltk'].apply(
+#     lambda x: [PENN_TREEBANK_TO_UNIVERSAL_MAP[pos] if pos in PENN_TREEBANK_TO_UNIVERSAL_MAP else "[UNK]" for pos in
+#                x])
+# print(df_pos['pos_nltk_univ'])
+# print(word_tokenize('I love python'))
+# df_pos['nltk_index'] = df_pos['sentence'].apply(
+#     lambda x: [x.index(tok) if tok in x else 'NA' for tok in word_tokenize(x)])
+# print(df_pos['nltk_index'])
+#
+# # stanza
+# nlp_stanza = stanza.Pipeline(lang='en', processors='tokenize,pos')
+# df_pos['pos_stanza'] = df_pos['sentence'].apply(lambda x: list(
+#     np.concatenate(np.array([[word.xpos for word in s.words] for s in nlp_stanza(x).sentences]), axis=0)))
+# print(df_pos['pos_stanza'])
+# df_pos['pos_stanza_univ'] = df_pos['pos_stanza'].apply(
+#     lambda x: [PENN_TREEBANK_TO_UNIVERSAL_MAP[pos] if pos in PENN_TREEBANK_TO_UNIVERSAL_MAP else "[UNK]" for pos in
+#                x])
+# print(df_pos['pos_stanza_univ'])
+# df_pos['stanza_index'] = df_pos['sentence'].apply(lambda x: [x.index(tok) if tok in x else 'NA' for tok in
+#                                                              np.concatenate(np.array(
+#                                                                  [[word.text for word in s.words] for s in
+#                                                                   nlp_stanza(x).sentences]), axis=0)])
+# print(df_pos['stanza_index'])
 
-# stanza
-nlp_stanza = stanza.Pipeline(lang='en', processors='tokenize,pos')
-df_pos['pos_stanza'] = df_pos['sentence'].apply(lambda x: list(
-    np.concatenate(np.array([[word.xpos for word in s.words] for s in nlp_stanza(x).sentences]), axis=0)))
-print(df_pos['pos_stanza'])
-df_pos['pos_stanza_univ'] = df_pos['pos_stanza'].apply(
-    lambda x: [PENN_TREEBANK_TO_UNIVERSAL_MAP[pos] if pos in PENN_TREEBANK_TO_UNIVERSAL_MAP else "[UNK]" for pos in
-               x])
-print(df_pos['pos_stanza_univ'])
 
 # spacy
 nlp_spacy = en_core_web_sm.load()
@@ -95,24 +110,33 @@ df_pos['pos_spacy_univ'] = df_pos['pos_spacy'].apply(lambda x:
                                                      [UNIVERSAL_MAP[pos] if pos in UNIVERSAL_MAP else pos for pos in
                                                       x])
 print(df_pos['pos_spacy_univ'])
+df_pos['spacy_index'] = df_pos['sentence'].apply(
+    lambda x: [x.index(tok.text) if tok.text in x else 'NA' for tok in nlp_spacy(x)])
+
+print(df_pos['spacy_index'])
 
 # flair
-
 tagger = SequenceTagger.load('pos')
 df_pos['pos_flair'] = df_pos['sentence']
+df_pos['flair_index'] = df_pos['sentence']
 for i in range(len(df_pos)):
-    if i%100 == 0:
+    if i % 100 == 0:
         print(i)
     sent_tokens = nltk.sent_tokenize(df_pos.loc[i, 'sentence'])
     sentences = [Sentence(i) for i in sent_tokens]
     tagger.predict(sentences)
-    df_pos.loc[i, 'pos_flair'] = str(np.concatenate(np.array([[word.get_tag('pos').value for word in sentence] for sentence in sentences]), axis=0))
+    df_pos.loc[i, 'pos_flair'] = str(list(
+        np.concatenate(np.array([[word.get_tag('pos').value for word in sentence] for sentence in sentences]), axis=0)))
+    df_pos.loc[i, 'flair_index'] = str([df_pos.loc[i, 'sentence'].index(tok) if tok in df_pos.loc[i, 'sentence'] else 'NA' for tok in
+        np.concatenate(np.array([[word.text for word in sentence] for sentence in sentences]), axis=0)])
+
 
 print(df_pos['pos_flair'])
 df_pos['pos_flair_univ'] = df_pos['pos_flair'].apply(lambda x:
                                                      [UNIVERSAL_MAP[pos] if pos in UNIVERSAL_MAP else pos for pos in
                                                       ast.literal_eval(x)])
 print(df_pos['pos_flair'])
+
 
 # textblob
 df_pos['pos_textblob'] = df_pos['sentence'].apply(lambda x: [i[1] for i in TextBlob(x).tags])
@@ -124,7 +148,8 @@ df_pos['pos_textblob_univ'] = df_pos['pos_textblob'].apply(lambda x:
                                                             x])
 
 print(df_pos['pos_textblob_univ'])
-
+df_pos['textblob_index'] = df_pos['sentence'].apply(
+    lambda x: [x.index(tok.text) if tok in x else 'NA' for tok in [i[0] for i in TextBlob(x).tags]])
 
 # gc
 
@@ -140,7 +165,6 @@ for i in range(len(df_pos)):
     nb_len_before += len(df_pos.loc[i, 'sentence'])
     df_pos.loc[i, 'pos_gc'] = str(labels)
     print(df_pos.loc[i, 'pos_gc'])
-
 
 print(df_pos['pos_gc'])
 
