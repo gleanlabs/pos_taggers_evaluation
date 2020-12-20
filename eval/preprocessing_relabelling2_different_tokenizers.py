@@ -111,7 +111,7 @@ for i in range(len(df_pos)):
 print(df_pos['pos_flair'])
 df_pos['pos_flair_univ'] = df_pos['pos_flair'].apply(lambda x:
                                                      [UNIVERSAL_MAP[pos] if pos in UNIVERSAL_MAP else pos for pos in
-                                                      x])
+                                                      ast.literal_eval(x)])
 print(df_pos['pos_flair'])
 
 # textblob
@@ -125,9 +125,32 @@ df_pos['pos_textblob_univ'] = df_pos['pos_textblob'].apply(lambda x:
 
 print(df_pos['pos_textblob_univ'])
 
-df_pos.to_csv('sentences_to_GT_POS_corr_temp.csv')
 
 # gc
+
+df_pos_gc = pd.read_csv('pos_results_gc.csv')
+
+nb_len_before = 0
+nb_len_after = 0
+for i in range(len(df_pos)):
+    if i % 100 == 0:
+        print(i)
+    nb_len_after += len(df_pos.loc[i, 'sentence'])
+    labels = df_pos_gc[(df_pos_gc.offset <= nb_len_after) & (df_pos_gc.offset >= nb_len_before)]['pos'].tolist()
+    nb_len_before += len(df_pos.loc[i, 'sentence'])
+    df_pos.loc[i, 'pos_gc'] = str(labels)
+    print(df_pos.loc[i, 'pos_gc'])
+
+
+print(df_pos['pos_gc'])
+
+df_pos['pos_gc_univ'] = df_pos['pos_gc'].apply(lambda x:
+                                               [UNIVERSAL_MAP[pos] if pos in UNIVERSAL_MAP else pos for pos in
+                                                ast.literal_eval(x)])
+print()
+print(df_pos['pos_gc_univ'])
+
+df_pos.to_csv('sentences_to_GT_POS_corr_temp.csv')
 
 # def different(spacy, nltk, stanza):
 #     if 0 in [1 if spacy_val == nltk_val == stanza_val else 0 for spacy_val, nltk_val, stanza_val in
