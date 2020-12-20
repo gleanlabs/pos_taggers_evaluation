@@ -19,24 +19,27 @@ df_pos['sentence_tok'] = df_pos['sentence'].apply(lambda x: x.split())
 df_pos['GT'] = df_pos['tagged_tokens_GT'].apply(lambda x: [i[1] for i in ast.literal_eval(x)])
 
 ARTICLE_TO_UNIVERSAL_MAP = dict([
-    ("&", "CONJ"), ("$", "NUM"), ("D", "DET"), ("P", "SCONJ"), ("A", "ADJ"), ("N", "NOUN"),
+    ("&", "CONJ"), ("$", "NUM"), ("D", "DET"), ("P", "SCONJ/ADP"), ("A", "ADJ"), ("N", "NOUN"),
     ("O", "PRON"), ("R", "ADV"), ("V", "VERB"), ("^", "PROPN"), ("G", "SYM"), ("!", "INTJ"), ("T", "PART"),
     ("X", "DET"), (",", "PUNCT")
 ])
 
 PENN_TREEBANK_TO_UNIVERSAL_MAP = dict([
-    ("CC", "CCONJ"), ("CD", "NUM"), ("DT", "DET"), ("PDT", "DET"), ("FW", "X"), ("IN", "SCONJ"), ("JJ", "ADJ"),
+    ("CC", "CCONJ"), ("CD", "NUM"), ("DT", "DET"), ("PDT", "DET"), ("FW", "X"), ("IN", "SCONJ/ADP"), ("JJ", "ADJ"),
     ("JJR", "ADJ"),
     ("JJS", "ADJ"), ("NN", "NOUN"), ("NNS", "NOUN"), ("MD", "VERB"),
     ("PRT", "PRT"), ("PRP", "PRON"), ("RB", "ADV"), ("RBR", "ADV"), ("RBS", "ADV"), ("WRB", "ADV"), ("VB", "VERB"),
     ("VBD", "VERB"),
     ("VBG", "VERB"), ("VBN", "VERB"), ("VBP", "VERB"), ("VBZ", "VERB"), ("NNP", "PROPN"),
-    ("NNPS", "PROPN"), ("SYM", "SYM"), ("RP", "PART"),
+    ("NNPS", "PROPN"), ("SYM", "SYM"), ("RP", "SCONJ"),
     (".", "PUNCT"), ("UH", "INTJ"), ("POS", "PRON"), ("PRP$", "PRON"), ("WDT", "DET"),
-    ("WP", "PRON"), ("TO", "SCONJ"),  ("-LRB-", "PUNCT"),  ("RRB-", "PUNCT"),  ("NFP", "PUNCT"),  ("HYPH", "PUNCT")
+    ("WP", "PRON"), ("TO", "SCONJ/ADP"), ("-LRB-", "PUNCT"), ("RRB-", "PUNCT"), ('-RRB-', "PUNCT"), ("NFP", "PUNCT"),
+    ("HYPH", "PUNCT")
+    , ("FW", "X"), ("LS", "X"), ("XX", "X"), ("ADD", "X"), ("AFX", "X"), ("GW", "X")
 ])
 UNIVERSAL_MAP = dict([
-    ("ADP", "SCONJ")
+    ("ADP", "SCONJ/ADP"),
+    ("SCONJ", "SCONJ/ADP")
 ])
 
 # nltk

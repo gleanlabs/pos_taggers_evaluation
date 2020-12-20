@@ -1,6 +1,6 @@
 import pandas as pd
 import nltk
-from tokenizer.treebankwordtokenizer_spacy_whitespace import RevisedTreeBankWordTokenizerVocab
+from tokenizer.treebankwordtokenizer_spacy import RevisedTreeBankWordTokenizerVocab
 import stanza
 import en_core_web_sm
 # stanza.download('en')
@@ -46,13 +46,13 @@ df_pos['sentence_tok'] = df_pos[['sentence', 'GT']].apply(lambda x: split_tok_ar
 df_pos['GT'] = df_pos[['sentence', 'GT']].apply(lambda x: split_labels_articles_that_need_to(x[0], x[1]), axis=1)
 
 ARTICLE_TO_UNIVERSAL_MAP = dict([
-    ("&", "CONJ"), ("$", "NUM"), ("D", "DET"), ("P", "SCONJ"), ("A", "ADJ"), ("N", "NOUN"),
+    ("&", "CONJ"), ("$", "NUM"), ("D", "DET"), ("P", "SCONJ/ADP"), ("A", "ADJ"), ("N", "NOUN"),
     ("O", "PRON"), ("R", "ADV"), ("V", "VERB"), ("^", "PROPN"), ("G", "SYM"), ("!", "INTJ"), ("T", "PART"),
     ("X", "DET"), (",", "PUNCT")
 ])
 
 PENN_TREEBANK_TO_UNIVERSAL_MAP = dict([
-    ("CC", "CCONJ"), ("CD", "NUM"), ("DT", "DET"), ("PDT", "DET"), ("FW", "X"), ("IN", "SCONJ"), ("JJ", "ADJ"),
+    ("CC", "CCONJ"), ("CD", "NUM"), ("DT", "DET"), ("PDT", "DET"), ("FW", "X"), ("IN", "SCONJ/ADP"), ("JJ", "ADJ"),
     ("JJR", "ADJ"),
     ("JJS", "ADJ"), ("NN", "NOUN"), ("NNS", "NOUN"), ("MD", "VERB"),
     ("PRT", "PRT"), ("PRP", "PRON"), ("RB", "ADV"), ("RBR", "ADV"), ("RBS", "ADV"), ("WRB", "ADV"), ("VB", "VERB"),
@@ -60,13 +60,14 @@ PENN_TREEBANK_TO_UNIVERSAL_MAP = dict([
     ("VBG", "VERB"), ("VBN", "VERB"), ("VBP", "VERB"), ("VBZ", "VERB"), ("NNP", "PROPN"),
     ("NNPS", "PROPN"), ("SYM", "SYM"), ("RP", "SCONJ"),
     (".", "PUNCT"), ("UH", "INTJ"), ("POS", "PRON"), ("PRP$", "PRON"), ("WDT", "DET"),
-    ("WP", "PRON"), ("TO", "SCONJ"),  ("-LRB-", "PUNCT"),  ("RRB-", "PUNCT"),  ("NFP", "PUNCT"),  ("HYPH", "PUNCT")
-    ,  ("FW", "X"),  ("FW", "LS"),  ("FW", "XX"),  ("FW", "ADD"),("FW", "AFX"),("FW", "GW")
+    ("WP", "PRON"), ("TO", "SCONJ/ADP"), ("-LRB-", "PUNCT"), ("RRB-", "PUNCT"), ('-RRB-', "PUNCT"), ("NFP", "PUNCT"),
+    ("HYPH", "PUNCT")
+    , ("FW", "X"), ("LS", "X"), ("XX", "X"), ("ADD", "X"), ("AFX", "X"), ("GW", "X")
 ])
 UNIVERSAL_MAP = dict([
-    ("ADP", "SCONJ")
+    ("ADP", "SCONJ/ADP"),
+    ("SCONJ", "SCONJ/ADP")
 ])
-
 # nltk
 df_pos['pos_nltk'] = df_pos['sentence'].apply(lambda x: [pos[1] for pos in nltk.pos_tag(word_tokenize(x))])
 print(df_pos['pos_nltk'])
@@ -95,21 +96,23 @@ df_pos['pos_spacy_univ'] = df_pos['pos_spacy'].apply(lambda x:
                                                       x])
 print(df_pos['pos_spacy_univ'])
 
+# flair
 
-# # flair
-#
-# tagger = SequenceTagger.load('pos')
-# df_pos['pos_flair'] = df_pos['sentence']
-# for i in range(len(df_pos)):
-#     sentences = Sentence(df_pos.loc[i, 'sentence_tok'] , use_tokenizer=False)
-#     tagger.predict(sentences)
-#     df_pos.loc[i, 'pos_flair'] = str([word.get_tag('pos').value for word in sentences])
-#
-# print(df_pos['pos_flair'])
-# df_pos['pos_flair_univ'] = df_pos['pos_flair'].apply(lambda x:
-#                                                      [UNIVERSAL_MAP[pos] if pos in UNIVERSAL_MAP else pos for pos in
-#                                                       x])
-# print(df_pos['pos_flair'])
+tagger = SequenceTagger.load('pos')
+df_pos['pos_flair'] = df_pos['sentence']
+for i in range(len(df_pos)):
+    if i%100 == 0:
+        print(i)
+    sent_tokens = nltk.sent_tokenize(df_pos.loc[i, 'sentence'])
+    sentences = [Sentence(i) for i in sent_tokens]
+    tagger.predict(sentences)
+    df_pos.loc[i, 'pos_flair'] = str(np.concatenate(np.array([[word.get_tag('pos').value for word in sentence] for sentence in sentences]), axis=0))
+
+print(df_pos['pos_flair'])
+df_pos['pos_flair_univ'] = df_pos['pos_flair'].apply(lambda x:
+                                                     [UNIVERSAL_MAP[pos] if pos in UNIVERSAL_MAP else pos for pos in
+                                                      x])
+print(df_pos['pos_flair'])
 
 # textblob
 df_pos['pos_textblob'] = df_pos['sentence'].apply(lambda x: [i[1] for i in TextBlob(x).tags])
@@ -125,9 +128,6 @@ print(df_pos['pos_textblob_univ'])
 df_pos.to_csv('sentences_to_GT_POS_corr_temp.csv')
 
 # gc
-
-
-
 
 # def different(spacy, nltk, stanza):
 #     if 0 in [1 if spacy_val == nltk_val == stanza_val else 0 for spacy_val, nltk_val, stanza_val in
@@ -152,15 +152,3 @@ df_pos.to_csv('sentences_to_GT_POS_corr_temp.csv')
 #     lambda x: [(i, j) for i, j in zip(x[0], x[1])], axis=1)
 # print(df_pos['gt_help'])
 # df_pos.to_csv('sentences_to_GT_POS_corr_temp.csv')
-#
-# # good format
-#
-# list_of_lists = []
-# for i in range(len(df_pos)):
-#     list_of_lists.append([df_pos.loc[i, 'row'], "(=SENTENCE     =)", df_pos.loc[i, 'sentence']])
-#     list_of_lists.append([df_pos.loc[i, 'row'], "(=ORIGINAL  POS=)", df_pos.loc[i, 'gt_help']])
-#     list_of_lists.append([df_pos.loc[i, 'row'], "(=CORRECTED POS=)", df_pos.loc[i, 'gt_help']])
-#     list_of_lists.append([df_pos.loc[i, 'row'], '', ''])
-#
-# df_corrected = pd.DataFrame(list_of_lists)
-#
