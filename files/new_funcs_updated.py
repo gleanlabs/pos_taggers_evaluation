@@ -4,7 +4,7 @@ import json
 import pandas as pd
 import nltk
 from tokenizer.treebankwordtokenizer import RevisedTreeBankWordTokenizer
-from tokenizer.treebankwordtokenizer_spacy import RevisedTreeBankWordTokenizerVocab
+from tokenizer.treebankwordtokenizer_spacy_whitespace import RevisedTreeBankWordTokenizerVocab
 import stanza
 import en_core_web_sm
 # stanza.download('en')
