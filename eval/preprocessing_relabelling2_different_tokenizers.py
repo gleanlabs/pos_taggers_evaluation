@@ -73,32 +73,33 @@ UNIVERSAL_MAP = dict([
     ("ADP", "SCONJ/ADP"),
     ("SCONJ", "SCONJ/ADP")
 ])
-# # nltk
-# df_pos['pos_nltk'] = df_pos['sentence'].apply(lambda x: [pos[1] for pos in nltk.pos_tag(word_tokenize(x))])
-# print(df_pos['pos_nltk'])
-# df_pos['pos_nltk_univ'] = df_pos['pos_nltk'].apply(
-#     lambda x: [PENN_TREEBANK_TO_UNIVERSAL_MAP[pos] if pos in PENN_TREEBANK_TO_UNIVERSAL_MAP else "[UNK]" for pos in
-#                x])
-# print(df_pos['pos_nltk_univ'])
-# print(word_tokenize('I love python'))
-# df_pos['nltk_index'] = df_pos['sentence'].apply(
-#     lambda x: [x.index(tok) if tok in x else 'NA' for tok in word_tokenize(x)])
-# print(df_pos['nltk_index'])
-#
-# # stanza
-# nlp_stanza = stanza.Pipeline(lang='en', processors='tokenize,pos')
-# df_pos['pos_stanza'] = df_pos['sentence'].apply(lambda x: list(
-#     np.concatenate(np.array([[word.xpos for word in s.words] for s in nlp_stanza(x).sentences]), axis=0)))
-# print(df_pos['pos_stanza'])
-# df_pos['pos_stanza_univ'] = df_pos['pos_stanza'].apply(
-#     lambda x: [PENN_TREEBANK_TO_UNIVERSAL_MAP[pos] if pos in PENN_TREEBANK_TO_UNIVERSAL_MAP else "[UNK]" for pos in
-#                x])
-# print(df_pos['pos_stanza_univ'])
-# df_pos['stanza_index'] = df_pos['sentence'].apply(lambda x: [x.index(tok) if tok in x else 'NA' for tok in
-#                                                              np.concatenate(np.array(
-#                                                                  [[word.text for word in s.words] for s in
-#                                                                   nlp_stanza(x).sentences]), axis=0)])
-# print(df_pos['stanza_index'])
+
+# nltk
+df_pos['pos_nltk'] = df_pos['sentence'].apply(lambda x: [pos[1] for pos in nltk.pos_tag(word_tokenize(x))])
+print(df_pos['pos_nltk'])
+df_pos['pos_nltk_univ'] = df_pos['pos_nltk'].apply(
+    lambda x: [PENN_TREEBANK_TO_UNIVERSAL_MAP[pos] if pos in PENN_TREEBANK_TO_UNIVERSAL_MAP else "[UNK]" for pos in
+               x])
+print(df_pos['pos_nltk_univ'])
+print(word_tokenize('I love python'))
+df_pos['nltk_index'] = df_pos['sentence'].apply(
+    lambda x: [x.index(tok) if tok in x else 'NA' for tok in word_tokenize(x)])
+print(df_pos['nltk_index'])
+
+# stanza
+nlp_stanza = stanza.Pipeline(lang='en', processors='tokenize,pos')
+df_pos['pos_stanza'] = df_pos['sentence'].apply(lambda x: list(
+    np.concatenate(np.array([[word.xpos for word in s.words] for s in nlp_stanza(x).sentences]), axis=0)))
+print(df_pos['pos_stanza'])
+df_pos['pos_stanza_univ'] = df_pos['pos_stanza'].apply(
+    lambda x: [PENN_TREEBANK_TO_UNIVERSAL_MAP[pos] if pos in PENN_TREEBANK_TO_UNIVERSAL_MAP else "[UNK]" for pos in
+               x])
+print(df_pos['pos_stanza_univ'])
+df_pos['stanza_index'] = df_pos['sentence'].apply(lambda x: [x.index(tok) if tok in x else 'NA' for tok in
+                                                             np.concatenate(np.array(
+                                                                 [[word.text for word in s.words] for s in
+                                                                  nlp_stanza(x).sentences]), axis=0)])
+print(df_pos['stanza_index'])
 
 
 # spacy
@@ -175,27 +176,3 @@ print()
 print(df_pos['pos_gc_univ'])
 
 df_pos.to_csv('sentences_to_GT_POS_corr_temp.csv')
-
-# def different(spacy, nltk, stanza):
-#     if 0 in [1 if spacy_val == nltk_val == stanza_val else 0 for spacy_val, nltk_val, stanza_val in
-#              zip(spacy, nltk, stanza)]:
-#         return 0
-#     else:
-#         return 1
-#
-#
-# def different_tokens(sentence_tok, spacy, nltk, stanza):
-#     return [sentence_tok_val if spacy_val == nltk_val == stanza_val else str("### " + sentence_tok_val) for
-#             sentence_tok_val, spacy_val, nltk_val, stanza_val in zip(sentence_tok, spacy, nltk, stanza)]
-#
-#
-# df_pos['is_different_tokens'] = df_pos[['pos_spacy_univ', 'pos_nltk_univ', 'pos_stanza_univ']].apply(
-#     lambda x: different(x[0], x[1], x[2]), axis=1)
-# df_pos['different_tokens'] = df_pos[['sentence_tok', 'pos_spacy_univ', 'pos_nltk_univ', 'pos_stanza_univ']].apply(
-#     lambda x: different_tokens(x[0], x[1], x[2], x[3]), axis=1)
-# print(df_pos['is_different_tokens'])
-# print(df_pos['different_tokens'])
-# df_pos['gt_help'] = df_pos[['different_tokens', 'GT']].apply(
-#     lambda x: [(i, j) for i, j in zip(x[0], x[1])], axis=1)
-# print(df_pos['gt_help'])
-# df_pos.to_csv('sentences_to_GT_POS_corr_temp.csv')
