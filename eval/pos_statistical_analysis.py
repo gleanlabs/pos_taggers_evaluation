@@ -4,45 +4,40 @@ import seaborn as sns
 import numpy as np
 import ast
 import matplotlib.pyplot as plt
-df_pos = pd.read_csv('sentences_to_GT_POS_corr_temp.csv')
-
-df_pos['gt_new'] = df_pos['sentence']
-
-def most_frequent(List):
-    occurence_count = Counter(List)
-    return occurence_count.most_common(1)[0][0]
-
-
-for i in range(len(df_pos)):
-    list_tokens = []
-    print(df_pos.loc[i, 'sentence'])
-    for tok, gt, index, val_nltk, val_stanza, val_textblob, val_spacy, val_gc in zip(ast.literal_eval(df_pos.loc[i, 'sentence_tok']),
-                                                                                     ast.literal_eval(df_pos.loc[i, 'GT']),
-                                                                                     ast.literal_eval(df_pos.loc[i, 'GT_index']),
-                                                                                     ast.literal_eval(df_pos.loc[i, 'pos_nltk_univ']),
-                                                                                     ast.literal_eval(df_pos.loc[i, 'pos_stanza_univ']),
-                                                                                     ast.literal_eval(df_pos.loc[i,
-                                                                                    'pos_textblob_univ']),
-                                                                                     ast.literal_eval(df_pos.loc[i, 'pos_spacy_univ']),
-                                                                                     ast.literal_eval(df_pos.loc[i, 'pos_gc_univ'])):
-        if index in ast.literal_eval(df_pos.loc[i, 'spacy_index']) + ast.literal_eval(df_pos.loc[i, 'stanza_index']) + ast.literal_eval(df_pos.loc[i, 'gc_index']) + \
-                ast.literal_eval(df_pos.loc[i, 'nltk_index']) + ast.literal_eval(df_pos.loc[i, 'textblob_index']):
-            most_frequent_val = most_frequent([gt, val_gc, val_nltk, val_stanza, val_spacy, val_textblob])
-            print(most_frequent_val)
-            print([gt, val_gc, val_nltk, val_stanza, val_spacy, val_textblob])
-            print("gt"+str(gt))
-            most_frequent_val_stanza_gc_overrated = most_frequent(
-                [gt, val_gc, val_gc, val_nltk, val_stanza, val_stanza, val_spacy, val_textblob])
-            list_tokens.append(
-                [tok, gt, most_frequent_val, [gt, val_gc, val_nltk, val_stanza, val_spacy, val_textblob].count(most_frequent_val),
-                 len(list(set([gt, val_gc, val_nltk, val_stanza, val_spacy, val_textblob]))),
-                 most_frequent_val == gt, most_frequent_val_stanza_gc_overrated,
-                 [gt, val_gc, val_nltk, val_stanza, val_spacy, val_textblob].count(most_frequent_val_stanza_gc_overrated),
-                 most_frequent_val_stanza_gc_overrated == gt])
-    df_pos.loc[i, 'gt_new'] = str(list_tokens)
-    print(df_pos.loc[i, 'gt_new'])
-
-print(df_pos['gt_new'])
+# df_pos = pd.read_csv('sentences_to_GT_POS_corr_temp.csv')
+#
+# df_pos['gt_new'] = df_pos['sentence']
+#
+# def most_frequent(List):
+#     occurence_count = Counter(List)
+#     return occurence_count.most_common(1)[0][0]
+#
+#
+# for i in range(len(df_pos)):
+#     list_tokens = []
+#     for tok, gt, index, val_nltk, val_stanza, val_textblob, val_spacy, val_gc in zip(ast.literal_eval(df_pos.loc[i, 'sentence_tok']),
+#                                                                                      ast.literal_eval(df_pos.loc[i, 'GT']),
+#                                                                                      ast.literal_eval(df_pos.loc[i, 'GT_index']),
+#                                                                                      ast.literal_eval(df_pos.loc[i, 'pos_nltk_univ']),
+#                                                                                      ast.literal_eval(df_pos.loc[i, 'pos_stanza_univ']),
+#                                                                                      ast.literal_eval(df_pos.loc[i,
+#                                                                                     'pos_textblob_univ']),
+#                                                                                      ast.literal_eval(df_pos.loc[i, 'pos_spacy_univ']),
+#                                                                                      ast.literal_eval(df_pos.loc[i, 'pos_gc_univ'])):
+#         if index in ast.literal_eval(df_pos.loc[i, 'spacy_index']) + ast.literal_eval(df_pos.loc[i, 'stanza_index']) + ast.literal_eval(df_pos.loc[i, 'gc_index']) + \
+#                 ast.literal_eval(df_pos.loc[i, 'nltk_index']) + ast.literal_eval(df_pos.loc[i, 'textblob_index']):
+#             most_frequent_val = most_frequent([gt, val_gc, val_nltk, val_stanza, val_spacy, val_textblob])
+#             most_frequent_val_stanza_gc_overrated = most_frequent(
+#                 [gt, val_gc, val_gc, val_nltk, val_stanza, val_stanza, val_spacy, val_textblob])
+#             list_tokens.append(
+#                 [tok, gt, most_frequent_val, [gt, val_gc, val_nltk, val_stanza, val_spacy, val_textblob].count(most_frequent_val),
+#                  len(list(set([gt, val_gc, val_nltk, val_stanza, val_spacy, val_textblob]))),
+#                  most_frequent_val == gt, most_frequent_val_stanza_gc_overrated,
+#                  [gt, val_gc, val_nltk, val_stanza, val_spacy, val_textblob].count(most_frequent_val_stanza_gc_overrated),
+#                  most_frequent_val_stanza_gc_overrated == gt])
+#     df_pos.loc[i, 'gt_new'] = str(list_tokens)
+#
+# print(df_pos['gt_new'])
 # df_pos.to_csv('sentences_to_GT_POS_corr_stats.csv')
 #
 # df_pos = pd.read_csv('sentences_to_GT_POS_corr_stats.csv')
@@ -56,48 +51,61 @@ print(df_pos['gt_new'])
 #             'is_most_frequent_gt_hw']] = pd.DataFrame(df_pos_exp.gt_new.tolist(), index=df_pos_exp.index)
 #
 # df_pos_exp.to_csv('sentences_to_GT_POS_corr_stats2.csv')
-#
-#
-#
-# df_pos_exp = pd.read_csv('sentences_to_GT_POS_corr_stats2.csv')
-#
-# df_pos_exp[df_pos_exp.is_most_frequent_gt == 1].to_csv('temp.csv')
-# print(df_pos_exp[df_pos_exp.is_most_frequent_gt == 1])
-# print(df_pos_exp[df_pos_exp.is_most_frequent_gt == 0]['gc_index'])
-# sns.kdeplot(data=df_pos_exp[df_pos_exp.is_most_frequent_gt == 1], x="count_most_frequent", hue="is_most_frequent_gt")
-# plt.show()
-# sns.kdeplot(data=df_pos_exp[df_pos_exp.is_most_frequent_gt == 0], x="count_most_frequent", hue="is_most_frequent_gt")
-# plt.show()
-# sns.kdeplot(data=df_pos_exp, x="count_most_frequent", hue="most_frequent")
-# plt.show()
-# sns.kdeplot(data=df_pos_exp[df_pos_exp.is_most_frequent_gt==0], x="most_frequent", hue="gt")
-# plt.show()
-# sns.kdeplot(data=df_pos_exp[df_pos_exp.is_most_frequent_gt==1], x="count_uniques", hue="gt")
-# plt.show()
+
+
+
+df_pos_exp = pd.read_csv('sentences_to_GT_POS_corr_stats2.csv')
+print(df_pos_exp[df_pos_exp.is_most_frequent_gt==1])
+sns.kdeplot(data=df_pos_exp, x="count_most_frequent", hue="is_most_frequent_gt")
+plt.title('When a major vote equals the GT or not, distributions of counting votes')
+plt.show()
+sns.kdeplot(data=df_pos_exp, x="count_most_frequent", hue="most_frequent")
+plt.title('How libraries tend to agree for each tag,  distributions of counting votes')
+plt.show()
 # sns.kdeplot(data=df_pos_exp[df_pos_exp.is_most_frequent_gt==1], x="count_most_frequent", hue="gt")
+# plt.title('How libraries tend to agree with the GT, distribution of counting votes')
+# plt.show()
+sns.kdeplot(data=df_pos_exp[df_pos_exp.is_most_frequent_gt==0], x="count_most_frequent", hue="gt")
+plt.title('How libraries tend to disagree with the GT, distribution of counting votes')
+plt.show()
+df_pos_exp_filt =df_pos_exp[df_pos_exp['gt'].isin(['NOUN', 'PROPN', 'ADJ'])]
+sns.kdeplot(data=df_pos_exp_filt[df_pos_exp_filt.is_most_frequent_gt==0], x="count_most_frequent", hue="gt")
+plt.title('How libraries tend to agree with the GT, distribution of counting votes (filt)')
+plt.show()
+# sns.kdeplot(data=df_pos_exp_filt[df_pos_exp_filt.is_most_frequent_gt==1], x="count_most_frequent", hue="gt")
+# plt.title('How libraries tend to disagree with the GT, distribution of counting votes (filt)')
 # plt.show()
 
-
-#heatmap things appearing together
-import matplotlib.pyplot as plt
-
-sns.set_theme(style="white")
-
-# Compute the correlation matrix
-corr = df_pos.corr()
-
-# Generate a mask for the upper triangle
-mask = np.triu(np.ones_like(corr, dtype=bool))
-
-# Set up the matplotlib figure
-f, ax = plt.subplots(figsize=(11, 9))
-
-# Generate a custom diverging colormap
-cmap = sns.diverging_palette(230, 20, as_cmap=True)
-
-# Draw the heatmap with the mask and correct aspect ratio
-sns.heatmap(corr, mask=mask, cmap=cmap, vmax=.3, center=0,
-            square=True, linewidths=.5, cbar_kws={"shrink": .5})
+# import numpy as np
+# import matplotlib
+# import matplotlib.pyplot as plt
+# # sphinx_gallery_thumbnail_number = 2
+#
+# tags = list(set(df_pos_exp_filt['gt'].tolist))
+# data = df_pos_exp_filt. df.groupby('gt')['b'].apply(list)
+# fig, ax = plt.subplots()
+# im = ax.imshow(tags)
+#
+# # We want to show all ticks...
+# ax.set_xticks(np.arange(len(tags)))
+# ax.set_yticks(np.arange(len(tags)))
+# # ... and label them with the respective list entries
+# ax.set_xticklabels(tags)
+# ax.set_yticklabels(tags)
+#
+# # Rotate the tick labels and set their alignment.
+# plt.setp(ax.get_xticklabels(), rotation=45, ha="right",
+#          rotation_mode="anchor")
+#
+# # Loop over data dimensions and create text annotations.
+# for i in range(len(tags)):
+#     for j in range(len(tags)):
+#         text = ax.text(j, i, harvest[i, j],
+#                        ha="center", va="center", color="w")
+#
+# ax.set_title("Harvest of local farmers (in tons/year)")
+# fig.tight_layout()
+# plt.show()
 
 
 
