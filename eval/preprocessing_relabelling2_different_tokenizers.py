@@ -56,6 +56,8 @@ ARTICLE_TO_UNIVERSAL_MAP = dict([
     ("X", "DET"), (",", "PUNCT")
 ])
 
+df_pos['GT'] = df_pos['GT'].apply(lambda x: [ARTICLE_TO_UNIVERSAL_MAP[i] if i in ARTICLE_TO_UNIVERSAL_MAP else "[UNK]"for i in ast.literal_eval(x)])
+
 PENN_TREEBANK_TO_UNIVERSAL_MAP = dict([
     ("CC", "CCONJ"), ("CD", "NUM"), ("DT", "DET"), ("PDT", "DET"), ("FW", "X"), ("IN", "SCONJ/ADP"), ("JJ", "ADJ"),
     ("JJR", "ADJ"),
