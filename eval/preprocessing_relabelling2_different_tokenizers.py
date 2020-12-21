@@ -138,6 +138,7 @@ df_pos['pos_flair_univ'] = df_pos['pos_flair'].apply(lambda x:
                                                       ast.literal_eval(x)])
 print(df_pos['pos_flair'])
 
+df_pos.to_csv('sentences_to_GT_POS_corr_temp.csv')
 
 # textblob
 df_pos['pos_textblob'] = df_pos['sentence'].apply(lambda x: [i[1] for i in TextBlob(x).tags])
@@ -150,7 +151,8 @@ df_pos['pos_textblob_univ'] = df_pos['pos_textblob'].apply(lambda x:
 
 print(df_pos['pos_textblob_univ'])
 df_pos['textblob_index'] = df_pos['sentence'].apply(
-    lambda x: [x.index(tok.text) if tok in x else 'NA' for tok in [i[0] for i in TextBlob(x).tags]])
+    lambda x: [x.index(tok) if tok in x else 'NA' for tok in [i[0] for i in TextBlob(x).tags]])
+df_pos.to_csv('sentences_to_GT_POS_corr_temp2.csv')
 
 # gc
 
@@ -175,4 +177,4 @@ df_pos['pos_gc_univ'] = df_pos['pos_gc'].apply(lambda x:
 print()
 print(df_pos['pos_gc_univ'])
 
-df_pos.to_csv('sentences_to_GT_POS_corr_temp.csv')
+df_pos.to_csv('sentences_to_GT_POS_corr_temp3.csv')
