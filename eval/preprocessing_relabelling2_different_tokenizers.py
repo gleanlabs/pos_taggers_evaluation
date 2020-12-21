@@ -161,14 +161,12 @@ nb_len_after = 0
 for i in range(len(df_pos)):
     if i % 100 == 0:
         print(i)
-    nb_len_after += len(df_pos.loc[i, 'sentence'])
+    nb_len_after += len(df_pos.loc[i, 'sentence'])+1
     labels = df_pos_gc[(df_pos_gc.offset <= nb_len_after) & (df_pos_gc.offset >= nb_len_before)]['pos'].tolist()
     offsets = [i-nb_len_before for i in df_pos_gc[(df_pos_gc.offset <= nb_len_after) & (df_pos_gc.offset >= nb_len_before)]['offset'].tolist()]
-    nb_len_before += len(df_pos.loc[i, 'sentence'])
+    nb_len_before += len(df_pos.loc[i, 'sentence'])+1
     df_pos.loc[i, 'pos_gc'] = str(labels)
     df_pos.loc[i, 'gc_index'] = str(offsets)
-
-    print(df_pos.loc[i, 'pos_gc'])
 
 print(df_pos['pos_gc'])
 
