@@ -65,7 +65,7 @@ PENN_TREEBANK_TO_UNIVERSAL_MAP = dict([
     ("PRT", "PRT"), ("PRP", "PRON"), ("RB", "ADV"), ("RBR", "ADV"), ("RBS", "ADV"), ("WRB", "ADV"), ("VB", "VERB"),
     ("VBD", "VERB"),
     ("VBG", "VERB"), ("VBN", "VERB"), ("VBP", "VERB"), ("VBZ", "VERB"), ("NNP", "PROPN"),
-    ("NNPS", "PROPN"), ("SYM", "SYM"), ("RP", "SCONJ"),
+    ("NNPS", "PROPN"), ("SYM", "SYM"), ("RP", "PART"),
     (".", "PUNCT"), ("UH", "INTJ"), ("POS", "PRON"), ("PRP$", "PRON"), ("WDT", "DET"),
     ("WP", "PRON"), ("TO", "SCONJ/ADP"), ("-LRB-", "PUNCT"), ("RRB-", "PUNCT"), ('-RRB-', "PUNCT"), ("NFP", "PUNCT"),
     ("HYPH", "PUNCT")
