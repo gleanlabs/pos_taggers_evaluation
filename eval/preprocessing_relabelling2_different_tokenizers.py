@@ -130,14 +130,13 @@ df_pos['flair_index'] = df_pos['sentence']
 for i in range(len(df_pos)):
     if i % 100 == 0:
         print(i)
-    sent_tokens = nltk.sent_tokenize(df_pos.loc[i, 'sentence'])
-    sentences = [Sentence(i) for i in sent_tokens]
+    # sent_tokens = nltk.sent_tokenize(df_pos.loc[i, 'sentence'])
+    # sentences = [Sentence(i) for i in sent_tokens]
+    sentences = Sentence(df_pos.loc[i, 'sentence'])
     tagger.predict(sentences)
-    df_pos.loc[i, 'pos_flair'] = str(list(
-        np.concatenate(np.array([[word.get_tag('pos').value for word in sentence] for sentence in sentences]), axis=0)))
-    df_pos.loc[i, 'flair_index'] = str(
-        [df_pos.loc[i, 'sentence'].index(tok) if tok in df_pos.loc[i, 'sentence'] else 'NA' for tok in
-         np.concatenate(np.array([[word.text for word in sentence] for sentence in sentences]), axis=0)])
+    df_pos.loc[i, 'pos_flair'] = str([word.get_tag('pos').value for word in sentences])
+    df_pos.loc[i, 'flair_index'] = str([i['start_pos'] for i in sentences.to_dict(tag_type='pos')['entities']])
+    print(df_pos.loc[i, 'flair_index'] )
 
 print(df_pos['pos_flair'])
 df_pos['pos_flair_univ'] = df_pos['pos_flair'].apply(lambda x:
