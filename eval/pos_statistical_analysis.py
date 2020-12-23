@@ -36,7 +36,7 @@ for i in range(len(df_pos)):
         spacy_index = ast.literal_eval(df_pos.loc[i, 'spacy_index'])
         textblob_index = ast.literal_eval(df_pos.loc[i, 'textblob_index'])
 
-        gc = [ast.literal_eval(df_pos.loc[i, 'pos_gc_univ'])
+        gc = ast.literal_eval(df_pos.loc[i, 'pos_gc_univ'])
         nltk = ast.literal_eval(df_pos.loc[i, 'pos_nltk_univ'])
         stanza = ast.literal_eval(df_pos.loc[i, 'pos_stanza_univ'])
         spacy = ast.literal_eval(df_pos.loc[i, 'pos_spacy_univ'])
