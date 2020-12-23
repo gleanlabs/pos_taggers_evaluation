@@ -3,21 +3,17 @@ import nltk
 from tokenizer.treebankwordtokenizer_spacy_whitespace import RevisedTreeBankWordTokenizerVocab
 import stanza
 import en_core_web_sm
-# stanza.download('en')
 import spacy
 import ast
 from flair.models import SequenceTagger
 from flair.data import Sentence
-from textblob import TextBlob
-from textblob.base import BaseTokenizer
 from nltk.tokenize import word_tokenize
-from nltk.tokenize import TreebankWordTokenizer as twt
-
 spacy.load('en_core_web_sm')
 import numpy as np
 import itertools
 
-df_pos = pd.read_csv('sentences_to_GT_POS_corr_temp3.csv')
+df_pos = pd.read_csv('sentences_to_GT_POS_corr_temp4.csv')
+
 
 def split_tok_articles_that_need_to(sent, gt):
     new_tok = []
@@ -42,38 +38,20 @@ def split_labels_articles_that_need_to(sent, gt):
     return list(itertools.chain.from_iterable(new_labels))
 
 
-# def get_index(text_tok):
-#     offset = 0
-#     offsets = []
-#     offsets.append(offset)
-#     for token in text_tok[1:]:
-#         offset += len(token)
-#         if "'" in token:
-#             offsets.append(offset + 1)  # Add one for each space.
-#         else:
-#             offsets.append(offset)
-#     return offsets
-
 def get_index(text_tok):
     offset = 0
     offsets = []
     for token in text_tok:
-        if "'" in token:
-            offset = offset-1
-            offsets.append(offset)
-        else:
-            offsets.append(offset)
-        offset += (len(token) + 1)  # Add one for each space.
+        offsets.append(offset)
+        offset += len(token)
     return offsets
 
 
-
-# df_pos = pd.read_csv('sentences_to_GT_POS.csv')
-# df_pos['GT'] = df_pos['tagged_tokens_GT'].apply(lambda x: [i[1] for i in ast.literal_eval(x)])
-# df_pos['sentence_tok'] = df_pos[['sentence', 'GT']].apply(lambda x: split_tok_articles_that_need_to(x[0], x[1]), axis=1)
-# df_pos['GT'] = df_pos[['sentence', 'GT']].apply(lambda x: split_labels_articles_that_need_to(x[0], x[1]), axis=1)
-# df_pos['GT_index'] = df_pos['sentence_tok'].apply(lambda x: get_index(x))
-# print(df_pos['GT_index'][1])
+df_pos = pd.read_csv('sentences_to_GT_POS.csv')
+df_pos['GT'] = df_pos['tagged_tokens_GT'].apply(lambda x: [i[1] for i in ast.literal_eval(x)])
+df_pos['sentence_tok'] = df_pos[['sentence', 'GT']].apply(lambda x: split_tok_articles_that_need_to(x[0], x[1]), axis=1)
+df_pos['GT'] = df_pos[['sentence', 'GT']].apply(lambda x: split_labels_articles_that_need_to(x[0], x[1]), axis=1)
+df_pos['GT_index'] = df_pos['sentence_tok'].apply(lambda x: get_index(x))
 
 ARTICLE_TO_UNIVERSAL_MAP = dict([
     ("&", "CONJ"), ("$", "NUM"), ("D", "DET"), ("P", "SCONJ/ADP"), ("A", "ADJ"), ("N", "NOUN"),
@@ -81,8 +59,8 @@ ARTICLE_TO_UNIVERSAL_MAP = dict([
     ("X", "DET"), (",", "PUNCT")
 ])
 
-# df_pos['GT'] = df_pos['GT'].apply(
-#     lambda x: [ARTICLE_TO_UNIVERSAL_MAP[i] if i in ARTICLE_TO_UNIVERSAL_MAP else "[UNK]" for i in x])
+df_pos['GT'] = df_pos['GT'].apply(
+    lambda x: [ARTICLE_TO_UNIVERSAL_MAP[i] if i in ARTICLE_TO_UNIVERSAL_MAP else "[UNK]" for i in x])
 
 PENN_TREEBANK_TO_UNIVERSAL_MAP = dict([
     ("CC", "CCONJ"), ("CD", "NUM"), ("DT", "DET"), ("PDT", "DET"), ("FW", "X"), ("IN", "SCONJ/ADP"), ("JJ", "ADJ"),
@@ -102,119 +80,84 @@ UNIVERSAL_MAP = dict([
     ("SCONJ", "SCONJ/ADP")
 ])
 
-# # # nltk
-# df_pos['pos_nltk'] = df_pos['sentence'].apply(lambda x: [pos[1] for pos in nltk.pos_tag(word_tokenize(x))])
-# print(df_pos['pos_nltk'])
-# df_pos['pos_nltk_univ'] = df_pos['pos_nltk'].apply(
-#     lambda x: [PENN_TREEBANK_TO_UNIVERSAL_MAP[pos] if pos in PENN_TREEBANK_TO_UNIVERSAL_MAP else "[UNK]" for pos in
-#                x])
-# print(df_pos['pos_nltk_univ'])
-# print(word_tokenize('I love python'))
-# df_pos['nltk_index'] = df_pos['sentence'].apply(
-#     lambda x: list([i[0] for i in twt().span_tokenize(x)]))
-# print(df_pos['nltk_index'][1])
-#
-# # stanza
-# nlp_stanza = stanza.Pipeline(lang='en', processors='tokenize,pos')
-# df_pos['pos_stanza'] = df_pos['sentence'].apply(lambda x: list(
-#     np.concatenate(np.array([[word.xpos for word in s.words] for s in nlp_stanza(x).sentences]), axis=0)))
-# print(df_pos['pos_stanza'])
-# df_pos['pos_stanza_univ'] = df_pos['pos_stanza'].apply(
-#     lambda x: [PENN_TREEBANK_TO_UNIVERSAL_MAP[pos] if pos in PENN_TREEBANK_TO_UNIVERSAL_MAP else "[UNK]" for pos in
-#                x])
-# print(df_pos['pos_stanza_univ'])
-# df_pos['stanza_index'] = df_pos['sentence'].apply(lambda x: list(
-#     np.concatenate(np.array([[word.misc.split("|")[0].split("=")[1] for word in s.words] for s in nlp_stanza(x).sentences]), axis=0)))
-# print(df_pos['stanza_index'][1])
-#
-#
-# # spacy
-# nlp_spacy = en_core_web_sm.load()
-# nlp_spacy.tokenizer = RevisedTreeBankWordTokenizerVocab(nlp_spacy.vocab)
-# df_pos['pos_spacy'] = df_pos['sentence_tok'].apply(lambda x: [word.pos_ for word in nlp_spacy(x)])
-# print(df_pos['pos_spacy'])
-# df_pos['pos_spacy_univ'] = df_pos['pos_spacy'].apply(lambda x:
-#                                                      [UNIVERSAL_MAP[pos] if pos in UNIVERSAL_MAP else pos for pos in
-#                                                       x])
-# print(df_pos['pos_spacy_univ'])
-# df_pos['spacy_index'] = df_pos['GT_index']
-#
-# print(df_pos['spacy_index'][1])
+# nltk
+df_pos['pos_nltk'] = df_pos['sentence'].apply(lambda x: [pos[1] for pos in nltk.pos_tag(word_tokenize(x))])
+print(df_pos['pos_nltk'])
+df_pos['pos_nltk_univ'] = df_pos['pos_nltk'].apply(
+    lambda x: [PENN_TREEBANK_TO_UNIVERSAL_MAP[pos] if pos in PENN_TREEBANK_TO_UNIVERSAL_MAP else "[UNK]" for pos in
+               x])
+print(df_pos['pos_nltk_univ'])
+print(word_tokenize('I love python'))
+df_pos['nltk_index'] = df_pos['sentence'].apply(
+    lambda x: get_index(word_tokenize(x)))
+print(df_pos['nltk_index'][1])
 
+# stanza
+nlp_stanza = stanza.Pipeline(lang='en', processors='tokenize,pos')
+df_pos['pos_stanza'] = df_pos['sentence'].apply(lambda x: list(
+    np.concatenate(np.array([[word.xpos for word in s.words] for s in nlp_stanza(x).sentences]), axis=0)))
+print(df_pos['pos_stanza'])
+df_pos['pos_stanza_univ'] = df_pos['pos_stanza'].apply(
+    lambda x: [PENN_TREEBANK_TO_UNIVERSAL_MAP[pos] if pos in PENN_TREEBANK_TO_UNIVERSAL_MAP else "[UNK]" for pos in
+               x])
+print(df_pos['pos_stanza_univ'])
+df_pos['stanza_index'] = df_pos['sentence'].apply(
+    lambda x: get_index(np.concatenate(np.array([[word.text for word in s.words] for s in nlp_stanza(x).sentences]))))
+print(df_pos['stanza_index'][1])
 
-#
-# # flair
-# tagger = SequenceTagger.load('pos')
-# df_pos['pos_flair'] = df_pos['sentence']
-# df_pos['flair_index'] = df_pos['sentence']
-# for i in range(len(df_pos)):
-#     if i % 100 == 0:
-#         print(i)
-#     # sent_tokens = nltk.sent_tokenize(df_pos.loc[i, 'sentence'])
-#     # sentences = [Sentence(i) for i in sent_tokens]
-#     sentences = Sentence(df_pos.loc[i, 'sentence'])
-#     tagger.predict(sentences)
-#     df_pos.loc[i, 'pos_flair'] = str([word.get_tag('pos').value for word in sentences])
-#     df_pos.loc[i, 'flair_index'] = str([i['start_pos'] for i in sentences.to_dict(tag_type='pos')['entities']])
-#     print(df_pos.loc[i, 'flair_index'] )
-#
-# print(df_pos['pos_flair'])
+# spacy
+nlp_spacy = en_core_web_sm.load()
+nlp_spacy.tokenizer = RevisedTreeBankWordTokenizerVocab(nlp_spacy.vocab)
+df_pos['pos_spacy'] = df_pos['sentence_tok'].apply(lambda x: [word.pos_ for word in nlp_spacy(x)])
+print(df_pos['pos_spacy'])
+df_pos['pos_spacy_univ'] = df_pos['pos_spacy'].apply(lambda x:
+                                                     [UNIVERSAL_MAP[pos] if pos in UNIVERSAL_MAP else pos for pos in
+                                                      x])
+print(df_pos['pos_spacy_univ'])
+df_pos['spacy_index'] = df_pos['sentence'].apply(lambda x: get_index([word.text for word in nlp_spacy(x)]))
+
+# flair
+tagger = SequenceTagger.load('pos')
+df_pos['pos_flair'] = df_pos['sentence']
+df_pos['flair_index'] = df_pos['sentence']
+for i in range(len(df_pos)):
+    if i % 100 == 0:
+        print(i)
+    sentences = Sentence(df_pos.loc[i, 'sentence'])
+    tagger.predict(sentences)
+    df_pos.loc[i, 'pos_flair'] = str([word.get_tag('pos').value for word in sentences])
+    df_pos.loc[i, 'flair_index'] = str([word.text for word in sentences])
+    print(df_pos.loc[i, 'flair_index'])
+
 df_pos['pos_flair_univ'] = df_pos['pos_flair'].apply(lambda x:
-                                                     [PENN_TREEBANK_TO_UNIVERSAL_MAP[pos] if pos in PENN_TREEBANK_TO_UNIVERSAL_MAP else pos for pos in
+                                                     [PENN_TREEBANK_TO_UNIVERSAL_MAP[
+                                                          pos] if pos in PENN_TREEBANK_TO_UNIVERSAL_MAP else pos for pos
+                                                      in
                                                       ast.literal_eval(x)])
 print(df_pos['pos_flair'])
 
-# textblob
-
-# class WordTokenizer(BaseTokenizer):
-#
-#     def tokenize(self, text, include_punc=False):
-#             '''Return a list of word tokens.
-#
-#             :param text: string of text.
-#             :param include_punc: (optional) whether to include punctuation as separate tokens. Default to True.
-#             '''
-#             tokens = nltk.tokenize.word_tokenize(text)
-#             return tokens
-#
-#
-# blob_object = TextBlob("I'm Simple is better than complex.", tokenizer = WordTokenizer())
-#
-# df_pos['pos_textblob'] = df_pos['sentence'].apply(lambda x: [i[1] for i in TextBlob(x, tokenizer = WordTokenizer()).tags])
-# print(df_pos['pos_textblob'])
-# df_pos['pos_textblob_univ'] = df_pos['pos_textblob'].apply(lambda x:
-#                                                      [PENN_TREEBANK_TO_UNIVERSAL_MAP[pos] if pos in PENN_TREEBANK_TO_UNIVERSAL_MAP else pos for pos in
-#                                                       x])
-#
-# print(df_pos['pos_textblob_univ'])
-#
-df_pos['textblob_index'] = df_pos['nltk_index']
-print(df_pos['textblob_index'][1])
-
 # gc
+df_pos_gc = pd.read_csv('pos_results_gc.csv')
 
-# df_pos_gc = pd.read_csv('pos_results_gc.csv')
-#
-# nb_len_before = 0
-# nb_len_after = 0
-# for i in range(len(df_pos)):
-#     if i % 100 == 0:
-#         print(i)
-#     nb_len_after += len(df_pos.loc[i, 'sentence']) + 1
-#     labels = df_pos_gc[(df_pos_gc.offset <= nb_len_after) & (df_pos_gc.offset >= nb_len_before)]['pos'].tolist()
-#     offsets = [i - nb_len_before for i in
-#                df_pos_gc[(df_pos_gc.offset <= nb_len_after) & (df_pos_gc.offset >= nb_len_before)]['offset'].tolist()]
-#     nb_len_before += len(df_pos.loc[i, 'sentence']) + 1
-#     df_pos.loc[i, 'pos_gc'] = str(labels)
-#     df_pos.loc[i, 'gc_index'] = str(offsets)
-#     print(df_pos.loc[i, 'gc_index'])
-#
-# print(df_pos['pos_gc'])
-#
-# df_pos['pos_gc_univ'] = df_pos['pos_gc'].apply(lambda x:
-#                                                [UNIVERSAL_MAP[pos] if pos in UNIVERSAL_MAP else pos for pos in
-#                                                 ast.literal_eval(x)])
-# print()
-# print(df_pos['pos_gc_univ'])
+nb_len_before = 0
+nb_len_after = 0
+for i in range(len(df_pos)):
+    nb_len_after += len(df_pos.loc[i, 'sentence']) + 1
+    labels = df_pos_gc[(df_pos_gc.offset <= nb_len_after) & (df_pos_gc.offset >= nb_len_before)]['pos'].tolist()
+    token = df_pos_gc[(df_pos_gc.offset < nb_len_after) & (df_pos_gc.offset >= nb_len_before)]['token'].tolist()
+    offsets = [i - nb_len_before for i in
+               df_pos_gc[(df_pos_gc.offset <= nb_len_after) & (df_pos_gc.offset >= nb_len_before)]['offset'].tolist()]
+    nb_len_before += len(df_pos.loc[i, 'sentence']) + 1
+    df_pos.loc[i, 'pos_gc'] = str(labels)
+    df_pos.loc[i, 'gc_token'] = str(token)
+    df_pos.loc[i, 'gc_index'] = str(get_index(ast.literal_eval(df_pos.loc[i, 'gc_token'])))
+    print(df_pos.loc[i, 'gc_index'])
 
-df_pos.to_csv('sentences_to_GT_POS_corr_temp4.csv')
+print(df_pos['pos_gc'])
+
+df_pos['pos_gc_univ'] = df_pos['pos_gc'].apply(lambda x:
+                                               [UNIVERSAL_MAP[pos] if pos in UNIVERSAL_MAP else pos for pos in
+                                                ast.literal_eval(x)])
+print(df_pos['pos_gc_univ'])
+
+df_pos.to_csv('sentences_to_GT_POS_corr_temp.csv')
