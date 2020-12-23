@@ -12,8 +12,6 @@ spacy.load('en_core_web_sm')
 import numpy as np
 import itertools
 
-df_pos = pd.read_csv('sentences_to_GT_POS_corr_temp4.csv')
-
 
 def split_tok_articles_that_need_to(sent, gt):
     new_tok = []
@@ -126,7 +124,7 @@ for i in range(len(df_pos)):
     sentences = Sentence(df_pos.loc[i, 'sentence'])
     tagger.predict(sentences)
     df_pos.loc[i, 'pos_flair'] = str([word.get_tag('pos').value for word in sentences])
-    df_pos.loc[i, 'flair_index'] = str([word.text for word in sentences])
+    df_pos.loc[i, 'flair_index'] = str(get_index([word.text for word in sentences]))
     print(df_pos.loc[i, 'flair_index'])
 
 df_pos['pos_flair_univ'] = df_pos['pos_flair'].apply(lambda x:
@@ -135,7 +133,7 @@ df_pos['pos_flair_univ'] = df_pos['pos_flair'].apply(lambda x:
                                                       in
                                                       ast.literal_eval(x)])
 print(df_pos['pos_flair'])
-
+df_pos.to_csv('sentences_to_GT_POS_corr_temp1.csv')
 # gc
 df_pos_gc = pd.read_csv('pos_results_gc.csv')
 
@@ -143,14 +141,18 @@ nb_len_before = 0
 nb_len_after = 0
 for i in range(len(df_pos)):
     nb_len_after += len(df_pos.loc[i, 'sentence']) + 1
-    labels = df_pos_gc[(df_pos_gc.offset <= nb_len_after) & (df_pos_gc.offset >= nb_len_before)]['pos'].tolist()
+    labels = df_pos_gc[(df_pos_gc.offset < nb_len_after) & (df_pos_gc.offset >= nb_len_before)]['pos'].tolist()
     token = df_pos_gc[(df_pos_gc.offset < nb_len_after) & (df_pos_gc.offset >= nb_len_before)]['token'].tolist()
     offsets = [i - nb_len_before for i in
-               df_pos_gc[(df_pos_gc.offset <= nb_len_after) & (df_pos_gc.offset >= nb_len_before)]['offset'].tolist()]
+               df_pos_gc[(df_pos_gc.offset < nb_len_after) & (df_pos_gc.offset >= nb_len_before)]['offset'].tolist()]
     nb_len_before += len(df_pos.loc[i, 'sentence']) + 1
     df_pos.loc[i, 'pos_gc'] = str(labels)
     df_pos.loc[i, 'gc_token'] = str(token)
-    df_pos.loc[i, 'gc_index'] = str(get_index(ast.literal_eval(df_pos.loc[i, 'gc_token'])))
+    try:
+        df_pos.loc[i, 'gc_index'] = str(get_index(ast.literal_eval(df_pos.loc[i, 'gc_token'])))
+    except:
+        print(1)
+        df_pos.loc[i, 'gc_index'] = str([])
     print(df_pos.loc[i, 'gc_index'])
 
 print(df_pos['pos_gc'])
