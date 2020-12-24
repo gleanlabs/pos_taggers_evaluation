@@ -17,10 +17,9 @@ def nltk_pos_fct(sent_tok: list):
 
 
 def stanza_pos_fct(sent_tok: list):
-    nlp_stanza = stanza.Pipeline(lang='en', processors='tokenize,pos')
-    return list(
-        np.concatenate(np.array([[(word.text, word.xpos) for word in s.words] for s in nlp_stanza(sent_tok).sentences]),
-                       axis=1))
+    nlp_stanza = stanza.Pipeline(lang='en', processors='tokenize,pos', tokenize_pretokenized=True)
+    pos_batch = [[(word.text, word.xpos) for word in s.words] for s in nlp_stanza(sent_tok).sentences]
+    return [item for sublist in pos_batch for item in sublist]
 
 
 def spacy_pos_fct(sent_tok: list):
@@ -35,4 +34,15 @@ def flair_pos_fct(sent_tok: list):
     tagger.predict(sentences)
     return [(word.text, word.get_tag('pos').value) for word in sentences]
 
-print( nltk_pos_fct(['I', 'am']))
+nlp_stanza = stanza.Pipeline(lang='en', processors='tokenize,pos', tokenize_pretokenized=True)
+# print(nlp_stanza([['I', 'am'], ['I', 'am']]))
+# print(list(np.concatenate(np.array([[(word.text, word.xpos) for word in s.words] for s in nlp_stanza([['I', 'am'], ['I', 'am']]).sentences]),
+#                        axis=1)))
+
+tagger = SequenceTagger.load('pos')
+sentences = [Sentence(i, use_tokenizer=False) for i in [['I', 'am'], ['I', 'am']]]
+tagger.predict(sentences)
+print(sentences)
+print(sentences[0][0].get_tag('pos'))
+print([[word.get_tag('pos').value for word in sentences] for sentence in sentences])
+print([[(word.text, word.get_tag('pos').value) for word in sentences] for sentence in sentences])

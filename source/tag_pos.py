@@ -3,7 +3,7 @@ Module which tags POS given a list of sentences and a package
 """
 from source.pos_taggers_functions import nltk_pos_fct, stanza_pos_fct, spacy_pos_fct, flair_pos_fct
 
-from source.tokenizer import tokenize
+from source.tokenizer_functions import tokenize
 
 
 def _choose_package(package_name: str):
@@ -14,8 +14,8 @@ def _pos_tag_sentence(package_name: str, sent: str):
     pos_tagger = _choose_package(package_name)
     res = []
     if pos_tagger == 'nltk':
-        for s in sent:
-            res.append(nltk_pos_fct(tokenize(sent)))
+        for sent_tok in tokenize(sent):
+            res.append([ nltk_pos_fct(tok) for tok in nltk_pos_fct(sent_tok)])
     if pos_tagger == 'spacy':
         for s in sent:
             res.append(spacy_pos_fct(tokenize(sent)))

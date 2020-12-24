@@ -1,7 +1,7 @@
 """
 Some functions that test the proper working of the tokenizer prior to pos tagging
 """
-from source.tokenizer import tokenize
+from source.tokenizer_functions import tokenize
 import pytest
 
 
@@ -20,11 +20,12 @@ def sentences():
 def tokens():
     expected = [
         [['So', 'the', 'whole', 'TCP/', 'IP', 'checksum', 'thing', "isn't", 'working', '...'],
-         ["I'm", 'thinking', 'that', 'anything', 'corrupted', 'in', 'transit', 'is', 'going', 'to', 'get', 'rejected',
+         ["I", "'m", 'thinking', 'that', 'anything', 'corrupted', 'in', 'transit', 'is', 'going', 'to', 'get',
+          'rejected',
           'at', 'a', 'much', 'lower', 'layer', 'than', 'the', 'application', 'level', '.']],
         [['I', 'am', 'coding', 'in', 'python.']],
         [['I', 'am', 'coding', 'in', 'python', '.']],
-        [['Using', "JavaScript's", 'escape', '/', 'unescape', 'function', 'is', 'almost', 'always', 'the', 'wrong',
+        [['Using', "JavaScript", "'s", 'escape', '/', 'unescape', 'function', 'is', 'almost', 'always', 'the', 'wrong',
           'thing', ',', 'it', 'is', 'incompatible', 'with', 'URL-encoding', 'or', 'any', 'other', 'standard',
           'encoding', 'on', 'the', 'web', '.'],
          ['Non-ASCII', 'characters', 'are', 'treated', 'unexpectedly', 'as', 'well', 'as', 'spaces', ',', 'and',
