@@ -1,6 +1,6 @@
 import pandas as pd
 import nltk
-from tokenizer.treebankwordtokenizer_spacy_whitespace import RevisedTreeBankWordTokenizerVocab
+from tokenizer.treebankwordtokenizer_spacy import RevisedTreeBankWordTokenizerVocab
 import stanza
 import en_core_web_sm
 import spacy
@@ -61,7 +61,7 @@ df_pos['GT'] = df_pos['GT'].apply(
     lambda x: [ARTICLE_TO_UNIVERSAL_MAP[i] if i in ARTICLE_TO_UNIVERSAL_MAP else "[UNK]" for i in x])
 
 PENN_TREEBANK_TO_UNIVERSAL_MAP = dict([
-    ("CC", "CCONJ"), ("CD", "NUM"), ("DT", "DET"), ("PDT", "DET"), ("FW", "X"), ("IN", "SCONJ/ADP"), ("JJ", "ADJ"),
+    ("CC", "CONJ"), ("CD", "NUM"), ("DT", "DET"), ("PDT", "DET"), ("FW", "X"), ("IN", "SCONJ/ADP"), ("JJ", "ADJ"),
     ("JJR", "ADJ"),
     ("JJS", "ADJ"), ("NN", "NOUN"), ("NNS", "NOUN"), ("MD", "VERB"),
     ("PRT", "PRT"), ("PRP", "PRON"), ("RB", "ADV"), ("RBR", "ADV"), ("RBS", "ADV"), ("WRB", "ADV"), ("VB", "VERB"),
@@ -106,13 +106,15 @@ print(df_pos['stanza_index'][1])
 # spacy
 nlp_spacy = en_core_web_sm.load()
 nlp_spacy.tokenizer = RevisedTreeBankWordTokenizerVocab(nlp_spacy.vocab)
-df_pos['pos_spacy'] = df_pos['sentence_tok'].apply(lambda x: [word.pos_ for word in nlp_spacy(x)])
+df_pos['pos_spacy'] = df_pos['sentence'].apply(lambda x: [word.pos_ for word in nlp_spacy(x)])
 print(df_pos['pos_spacy'])
 df_pos['pos_spacy_univ'] = df_pos['pos_spacy'].apply(lambda x:
                                                      [UNIVERSAL_MAP[pos] if pos in UNIVERSAL_MAP else pos for pos in
                                                       x])
 print(df_pos['pos_spacy_univ'])
+
 df_pos['spacy_index'] = df_pos['sentence'].apply(lambda x: get_index([word.text for word in nlp_spacy(x)]))
+print(df_pos['spacy_index'])
 
 # flair
 tagger = SequenceTagger.load('pos')
@@ -133,7 +135,7 @@ df_pos['pos_flair_univ'] = df_pos['pos_flair'].apply(lambda x:
                                                       in
                                                       ast.literal_eval(x)])
 print(df_pos['pos_flair'])
-df_pos.to_csv('sentences_to_GT_POS_corr_temp1.csv')
+df_pos.to_csv('sentences_to_GT_POS_corr_temp.csv')
 # gc
 df_pos_gc = pd.read_csv('pos_results_gc.csv')
 

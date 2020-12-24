@@ -5,65 +5,60 @@ import numpy as np
 import ast
 import matplotlib.pyplot as plt
 from sklearn import preprocessing
-
-
-df_pos = pd.read_csv('sentences_to_GT_POS_corr_temp4.csv')
-df_pos = df_pos[['row', 'sentence', 'GT', 'sentence_tok', 'GT_index', 'pos_nltk_univ', 'nltk_index', 'pos_stanza_univ',
-                 'stanza_index', 'pos_spacy_univ', 'spacy_index', 'pos_flair_univ', 'flair_index', 'pos_textblob_univ',
-                 'textblob_index', 'pos_gc_univ', 'gc_index']]
-df_pos['gt_new'] = df_pos['sentence']
-df_pos['libraries_pred'] = df_pos['sentence']
-
-
-def most_frequent(List):
-    occurence_count = Counter(List)
-    return occurence_count.most_common(1)[0][0]
-
-
-for i in range(len(df_pos)):
-    list_tokens = []
-    list_libraries_predictions = []
-    for tok, gt, index in zip(
-            ast.literal_eval(df_pos.loc[i, 'sentence_tok']),
-            ast.literal_eval(df_pos.loc[i, 'GT']),
-            ast.literal_eval(df_pos.loc[i, 'GT_index'])):
-        gc_index = ast.literal_eval(df_pos.loc[i, 'gc_index'])
-        nltk_index = ast.literal_eval(df_pos.loc[i, 'nltk_index'])
-        stanza_index = ast.literal_eval(df_pos.loc[i, 'stanza_index'])
-        flair_index = ast.literal_eval(df_pos.loc[i, 'flair_index'])
-        if len(stanza_index)>0:
-            stanza_index = [int(j) if j not in ["'", ",", "[", " ", "]"] else 0 for j in stanza_index]
-        spacy_index = ast.literal_eval(df_pos.loc[i, 'spacy_index'])
-        textblob_index = ast.literal_eval(df_pos.loc[i, 'textblob_index'])
-
-        gc = ast.literal_eval(df_pos.loc[i, 'pos_gc_univ'])
-        nltk = ast.literal_eval(df_pos.loc[i, 'pos_nltk_univ'])
-        stanza = ast.literal_eval(df_pos.loc[i, 'pos_stanza_univ'])
-        spacy = ast.literal_eval(df_pos.loc[i, 'pos_spacy_univ'])
-        textblob = ast.literal_eval(df_pos.loc[i, 'pos_textblob_univ'])
-        flair = ast.literal_eval(df_pos.loc[i, 'pos_flair_univ'])
-
-        if (index in spacy_index) & (
-                index in stanza_index) & (
-                index in gc_index) & (
-                index in nltk_index) & (
-                index in textblob_index)& (
-                index in flair_index):
-            if textblob_index.index(index) < len(textblob):
-                preds = [gt, flair[flair_index.index(index) ], gc[gc_index.index(index)], nltk[nltk_index.index(index)], stanza[stanza_index.index(index)],
-                         spacy[spacy_index.index(index)], textblob[textblob_index.index(index)]]
-                most_frequent_val = most_frequent(preds)
-                list_tokens.append(
-                    [tok, gt, most_frequent_val, preds.count(most_frequent_val),
-                     len(list(set(preds))),
-                     most_frequent_val == gt,
-                     preds])
-    df_pos.loc[i, 'gt_new'] = str(list_tokens)
-
-print(df_pos['gt_new'])
-df_pos.to_csv('sentences_to_GT_POS_corr_stats.csv')
-
-
+#
+# df_pos = pd.read_csv('sentences_to_GT_POS_corr_temp.csv')
+# df_pos = df_pos[['row', 'sentence', 'GT', 'sentence_tok', 'GT_index', 'pos_nltk_univ', 'nltk_index', 'pos_stanza_univ',
+#                  'stanza_index', 'pos_spacy_univ', 'spacy_index', 'pos_flair_univ', 'flair_index', 'pos_gc_univ',
+#                  'gc_index']]
+# df_pos['gt_new'] = df_pos['sentence']
+# df_pos['libraries_pred'] = df_pos['sentence']
+#
+#
+# def most_frequent(List):
+#     occurence_count = Counter(List)
+#     return occurence_count.most_common(1)[0][0]
+#
+#
+# for i in range(len(df_pos)):
+#     list_tokens = []
+#     list_libraries_predictions = []
+#     for tok, gt, index in zip(
+#             ast.literal_eval(df_pos.loc[i, 'sentence_tok']),
+#             ast.literal_eval(df_pos.loc[i, 'GT']),
+#             ast.literal_eval(df_pos.loc[i, 'GT_index'])):
+#         gc_index = ast.literal_eval(df_pos.loc[i, 'gc_index'])
+#         nltk_index = ast.literal_eval(df_pos.loc[i, 'nltk_index'])
+#         stanza_index = ast.literal_eval(df_pos.loc[i, 'stanza_index'])
+#         flair_index = ast.literal_eval(df_pos.loc[i, 'flair_index'])
+#         if len(stanza_index) > 0:
+#             stanza_index = [int(j) if j not in ["'", ",", "[", " ", "]"] else 0 for j in stanza_index]
+#         spacy_index = ast.literal_eval(df_pos.loc[i, 'spacy_index'])
+#
+#         gc = ast.literal_eval(df_pos.loc[i, 'pos_gc_univ'])
+#         nltk = ast.literal_eval(df_pos.loc[i, 'pos_nltk_univ'])
+#         stanza = ast.literal_eval(df_pos.loc[i, 'pos_stanza_univ'])
+#         spacy = ast.literal_eval(df_pos.loc[i, 'pos_spacy_univ'])
+#         flair = ast.literal_eval(df_pos.loc[i, 'pos_flair_univ'])
+#
+#         if (index in spacy_index) & (
+#                 index in stanza_index) & (
+#                 index in gc_index) & (
+#                 index in nltk_index) & (
+#                 index in flair_index):
+#             preds = [gt, flair[flair_index.index(index)], gc[gc_index.index(index)], nltk[nltk_index.index(index)],
+#                      stanza[stanza_index.index(index)],
+#                      spacy[spacy_index.index(index)]]
+#             most_frequent_val = most_frequent(preds)
+#             list_tokens.append(
+#                 [tok, gt, most_frequent_val, preds.count(most_frequent_val),
+#                  len(list(set(preds))),
+#                  most_frequent_val == gt,
+#                  preds])
+#     df_pos.loc[i, 'gt_new'] = str(list_tokens)
+#
+# print(df_pos['gt_new'])
+# df_pos.to_csv('sentences_to_GT_POS_corr_stats.csv')
+#
 # df_pos = pd.read_csv('sentences_to_GT_POS_corr_stats.csv')
 # df_pos['gt_new'] = df_pos['gt_new'].apply(lambda x: ast.literal_eval(x))
 # df_pos_exp = df_pos.explode('gt_new')
@@ -73,16 +68,14 @@ df_pos.to_csv('sentences_to_GT_POS_corr_stats.csv')
 #             'libraries_pred']] = pd.DataFrame(df_pos_exp.gt_new.tolist(), index=df_pos_exp.index)
 # df_pos_exp.to_csv('sentences_to_GT_POS_corr_stats_new_gt.csv')
 #
-#
-#
 # df_pos = pd.read_csv('sentences_to_GT_POS_corr_stats_new_gt.csv')
 # df_pos['libraries_pred'] = df_pos['libraries_pred'].apply(lambda x: ast.literal_eval(x))
 # df_pos = df_pos[['row', 'libraries_pred', 'gt_new']]
 # df_pos['is_gt_new_list'] = df_pos['libraries_pred'].apply(lambda x: type(x))
 # df_pos = df_pos[df_pos.is_gt_new_list == list]
-# df_pos[['GT', 'flair', 'GC', 'nltk', 'stanza', 'spacy', 'textblob']] = pd.DataFrame(df_pos.libraries_pred.tolist(), index=df_pos.index)
+# df_pos[['GT', 'flair', 'GC', 'nltk', 'stanza', 'spacy']] = pd.DataFrame(df_pos.libraries_pred.tolist(),
+#                                                                         index=df_pos.index)
 # df_pos.to_csv('sentences_to_GT_POS_corr_stats_libraries.csv')
-
 
 # PLOTS
 # df_pos_exp = pd.read_csv('sentences_to_GT_POS_corr_stats_new_gt.csv')
@@ -160,8 +153,8 @@ df_pos.to_csv('sentences_to_GT_POS_corr_stats.csv')
 
 # PLOTS LIBRARIES
 # df_pos_exp =  pd.read_csv('sentences_to_GT_POS_corr_stats_libraries.csv')
-# print(df_pos_exp[['GT', 'GC', 'nltk', 'stanza', 'spacy', 'textblob']])
-# stacked = df_pos_exp[['GT', 'GC', 'nltk', 'stanza', 'spacy', 'textblob']].stack().astype('category')
+# print(df_pos_exp[['GT', 'GC', 'nltk', 'stanza', 'spacy']])
+# stacked = df_pos_exp[['GT', 'GC', 'nltk', 'stanza', 'spacy']].stack().astype('category')
 # df_pos_exp_encoded = stacked.cat.codes.unstack()
 # print(df_pos_exp_encoded)
 #
@@ -262,27 +255,31 @@ df_pos.to_csv('sentences_to_GT_POS_corr_stats.csv')
 # df_pos['pos_spacy_univ'] = df_pos['pos_spacy_univ'].apply(lambda x: ast.literal_eval(x))
 #
 # df_pos_exp = df_pos.explode('pos_spacy_univ')
-# print(len(df_pos_exp))
-#
-# df_pos = pd.read_csv('sentences_to_GT_POS_corr_stats_new_gt.csv')
-# print(len(df_pos))
-# df_pos[(df_pos.count_most_frequent == 5) & (df_pos.is_most_frequent_gt == 0)].to_csv('temp5.csv')
-# df_pos[(df_pos.count_most_frequent == 6) & (df_pos.is_most_frequent_gt == 0)].to_csv('temp6.csv')
-
-# print(len(df_pos[(df_pos.count_most_frequent == 5) & (df_pos.is_most_frequent_gt == 0)]))
-# print(len(df_pos[df_pos.count_most_frequent == 6]))
-# df_pos[df_pos.count_most_frequent == 6].to_csv('temp6.csv')
-# print(len(df_pos[(df_pos.count_most_frequent == 6) & (df_pos.is_most_frequent_gt == 0)]))
-
 
 df_pos = pd.read_csv('sentences_to_GT_POS_corr_stats_new_gt.csv')
-print(len(df_pos))
+df_pos[(df_pos.count_most_frequent == 5) & (df_pos.is_most_frequent_gt == 0)].to_csv('temp5.csv')
+
+print(len(df_pos[(df_pos.count_most_frequent == 5) & (df_pos.is_most_frequent_gt == 0)]))
+
 df_pos[
-    (df_pos.count_most_frequent == 4) & (df_pos.is_most_frequent_gt == 0) & (df_pos.count_uniques.isin([2, 3]))].to_csv(
-    'temp4-23.csv')
+    (df_pos.count_most_frequent == 4) & (df_pos.is_most_frequent_gt == 0) & (df_pos.count_uniques == 2)].to_csv(
+    'temp4-0-2.csv')
 print(len(
-    df_pos[(df_pos.count_most_frequent == 4) & (df_pos.is_most_frequent_gt == 0) & (df_pos.count_uniques.isin([2, 3]))]))
-df_pos[(df_pos.count_most_frequent == 4) & (df_pos.is_most_frequent_gt == 0) & (df_pos.count_uniques == 4)].to_csv(
-    'temp4-4.csv')
-print(len(df_pos[(df_pos.count_most_frequent == 4) & (df_pos.is_most_frequent_gt == 0) & (df_pos.count_uniques == 4)]))
+    df_pos[(df_pos.count_most_frequent == 4) & (df_pos.is_most_frequent_gt == 0) & (df_pos.count_uniques== 2)]))
+
+df_pos[(df_pos.count_most_frequent == 4) & (df_pos.is_most_frequent_gt == 0) & (df_pos.count_uniques == 3)].to_csv(
+    'temp4-0-3.csv')
+print(len(df_pos[(df_pos.count_most_frequent == 4) & (df_pos.is_most_frequent_gt == 0) & (df_pos.count_uniques == 3)]))
+
+df_pos[
+    (df_pos.count_most_frequent == 4) & (df_pos.is_most_frequent_gt == 1) & (df_pos.count_uniques == 2)].to_csv(
+    'temp4-1-2.csv')
+print(len(
+    df_pos[(df_pos.count_most_frequent == 4) & (df_pos.is_most_frequent_gt == 1) & (df_pos.count_uniques== 2)]))
+
+df_pos[(df_pos.count_most_frequent == 4) & (df_pos.is_most_frequent_gt == 1) & (df_pos.count_uniques == 3)].to_csv(
+    'temp4-1-3.csv')
+print(len(df_pos[(df_pos.count_most_frequent == 4) & (df_pos.is_most_frequent_gt == 1) & (df_pos.count_uniques == 3)]))
+
+
 
