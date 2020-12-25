@@ -1,6 +1,6 @@
 import pandas as pd
 import nltk
-from tokenizer.treebankwordtokenizer_spacy import RevisedTreeBankWordTokenizerVocab
+from tokenizer.treebankwordtokenizer_spacy_whitespace import RevisedTreeBankWordTokenizerVocab
 import stanza
 import en_core_web_sm
 import spacy
@@ -13,10 +13,12 @@ import itertools
 
 
 def nltk_pos_fct(sent_tok: list):
-    return nltk.pos_tag(sent_tok)
+    sent_tags = [nltk.pos_tag(sub_sent_tok) for sub_sent_tok in sent_tok]
+    return [item for sublist in sent_tags for item in sublist]
 
 
 def stanza_pos_fct(sent_tok: list):
+    #uses batches
     nlp_stanza = stanza.Pipeline(lang='en', processors='tokenize,pos', tokenize_pretokenized=True)
     pos_batch = [[(word.text, word.xpos) for word in s.words] for s in nlp_stanza(sent_tok).sentences]
     return [item for sublist in pos_batch for item in sublist]
@@ -25,24 +27,14 @@ def stanza_pos_fct(sent_tok: list):
 def spacy_pos_fct(sent_tok: list):
     nlp_spacy = en_core_web_sm.load()
     nlp_spacy.tokenizer = RevisedTreeBankWordTokenizerVocab(nlp_spacy.vocab)
-    return [(word.text, word.pos_) for word in nlp_spacy(sent_tok)]
+    sent_tags = [[(word.text, word.pos_) for word in nlp_spacy(s)] for s in sent_tok]
+    return [item for sublist in sent_tags for item in sublist]
 
 
 def flair_pos_fct(sent_tok: list):
+    #uses batches
     tagger = SequenceTagger.load('pos')
-    sentences = Sentence(sent_tok, use_tokenizer=False)
+    sentences = [Sentence(i, use_tokenizer=False) for i in sent_tok]
     tagger.predict(sentences)
-    return [(word.text, word.get_tag('pos').value) for word in sentences]
-
-nlp_stanza = stanza.Pipeline(lang='en', processors='tokenize,pos', tokenize_pretokenized=True)
-# print(nlp_stanza([['I', 'am'], ['I', 'am']]))
-# print(list(np.concatenate(np.array([[(word.text, word.xpos) for word in s.words] for s in nlp_stanza([['I', 'am'], ['I', 'am']]).sentences]),
-#                        axis=1)))
-
-tagger = SequenceTagger.load('pos')
-sentences = [Sentence(i, use_tokenizer=False) for i in [['I', 'am'], ['I', 'am']]]
-tagger.predict(sentences)
-print(sentences)
-print(sentences[0][0].get_tag('pos'))
-print([[word.get_tag('pos').value for word in sentences] for sentence in sentences])
-print([[(word.text, word.get_tag('pos').value) for word in sentences] for sentence in sentences])
+    sent_tags = [[(word.text, word.get_tag('pos').value) for word in sentence] for sentence in sentences]
+    return [item for sublist in sent_tags for item in sublist]

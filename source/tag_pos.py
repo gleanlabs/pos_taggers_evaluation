@@ -10,30 +10,21 @@ def _choose_package(package_name: str):
     return package_name
 
 
-def _pos_tag_sentence(package_name: str, sent: str):
+def _pos_tag_sentence(package_name: str, doc: str):
     pos_tagger = _choose_package(package_name)
     res = []
     if pos_tagger == 'nltk':
-        for sent_tok in tokenize(sent):
-            res.append([ nltk_pos_fct(tok) for tok in nltk_pos_fct(sent_tok)])
+        return(nltk_pos_fct(tokenize(doc)))
     if pos_tagger == 'spacy':
-        for s in sent:
-            res.append(spacy_pos_fct(tokenize(sent)))
-    return res
-
-
-def _pos_tag_batch(package_name: str, batch: list):  # check syntax for type hints
-    pos_tagger = _choose_package(package_name)
-    res = []
+        return(spacy_pos_fct(tokenize(doc)))
     if pos_tagger == 'stanza':
-        for sent in batch:
-            res.append(stanza_pos_fct(tokenize(sent)))
+        return(stanza_pos_fct(tokenize(doc)))
     if pos_tagger == 'flair':
-        for sent in batch:
-            res.append(flair_pos_fct(tokenize(sent)))
+        return(flair_pos_fct(tokenize(doc)))
     return res
 
-#
+
+
 # def _read_tag_map(tag_path: str):
 #     tag_map = ""
 #     return tag_map
