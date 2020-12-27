@@ -45,7 +45,7 @@ def test_each_package_returns_same_number_results(documents: list):
         assert len(_pos_tag_sentence('nltk', doc)) == len(_pos_tag_sentence('stanza', doc)) == len(
             _pos_tag_sentence('spacy',
                               doc)) == len(_pos_tag_sentence(
-            'flair', doc)) ==   len(_pos_tag_sentence(
+            'flair', doc)) == len(_pos_tag_sentence(
             'article', doc))
 
 
