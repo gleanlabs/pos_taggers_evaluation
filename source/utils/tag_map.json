@@ -34,7 +34,6 @@
     "PDT": "DET",
     "FW": "X",
     ":": "PUNCT",
-    ".": "PUNCT",
     ",": "PUNCT",
     "''": "PUNCT",
     "--": "SYM",
@@ -81,7 +80,9 @@
     "XX": "X",
     "ADD": "X",
     "AFX": "X",
-    "GW": "X"
+    "GW": "X",
+    "WP$": "PRON",
+    "EX": "DET"
   },
   "ARTICLE-UNIV": {
     "&": "CCONJ",
@@ -101,3 +102,4 @@
     ",": "PUNCT"
   }
 }
+

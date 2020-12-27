@@ -59,9 +59,3 @@ def article_gt(sent: list):
     sent_tok = _split_composite_pos_tokens(df_pos[df_pos.sentence == sent]['tagged_tokens_GT'].apply(
         lambda x: [i[0] for i in ast.literal_eval(x)]).tolist()[0])
     return [(sent_tok_val, gt_val) for gt_val, sent_tok_val in zip(gt, sent_tok)]
-
-from nltk.data import load
-nltk.download('tagsets')
-tagdict = load('help/tagsets/upenn_tagset.pickle')
-tagdict['NN'][0]
-print(tagdict.keys())
