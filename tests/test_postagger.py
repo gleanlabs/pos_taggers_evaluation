@@ -9,10 +9,10 @@ from source.tokenizer_functions import tokenize
 @pytest.fixture
 def documents():
     documents_list = [
-        "So the whole TCP/ IP checksum thing isn't working ... I'm thinking that anything corrupted in transit is going to get rejected at a much lower layer than the application level .",
-        "I am coding in python.",
-        "I am coding in python .",
-        "Using JavaScript's escape / unescape function is almost always the wrong thing , it is incompatible with URL-encoding or any other standard encoding on the web . Non-ASCII characters are treated unexpectedly as well as spaces , and older browsers don't necessarily have the same behaviour . As mentioned by roenving , the method you want is decodeURIComponent() .",
+        "Thats an approach I had not considered . I'd end up polling from the Javascript until something changes , but that might work .",
+        "URL decoding in Javascript",
+        "How to register a JavaScript callback in a Java Applet ?",
+        "I would not disagree with this .",
     ]
     return documents_list
 
@@ -28,6 +28,7 @@ def test_tokens_for_each_packages(documents: list):
         assert [i[0] for i in _pos_tag_sentence('stanza', doc)] == flatten_list_tokens
         assert [i[0] for i in _pos_tag_sentence('spacy', doc)] == flatten_list_tokens
         assert [i[0] for i in _pos_tag_sentence('flair', doc)] == flatten_list_tokens
+        assert [i[0] for i in _pos_tag_sentence('article', doc)] == flatten_list_tokens
 
 
 def test_each_package_returns_same_number_results(documents: list):
@@ -44,7 +45,8 @@ def test_each_package_returns_same_number_results(documents: list):
         assert len(_pos_tag_sentence('nltk', doc)) == len(_pos_tag_sentence('stanza', doc)) == len(
             _pos_tag_sentence('spacy',
                               doc)) == len(_pos_tag_sentence(
-            'flair', doc))
+            'flair', doc)) ==   len(_pos_tag_sentence(
+            'article', doc))
 
 
 def test_each_token_has_a_tag(documents: list):
@@ -58,6 +60,7 @@ def test_each_token_has_a_tag(documents: list):
         assert all(item in keys for item in [i[1] for i in _pos_tag_sentence('stanza', doc)]) == True
         assert all(item in keys for item in [i[1] for i in _pos_tag_sentence('spacy', doc)]) == True
         assert all(item in keys for item in [i[1] for i in _pos_tag_sentence('flair', doc)]) == True
+        assert all(item in keys for item in [i[1] for i in _pos_tag_sentence('article', doc)]) == True
 
 
 def test_each_token_has_a_mapped_correct_tag(documents: list):
@@ -75,8 +78,12 @@ def test_each_token_has_a_mapped_correct_tag(documents: list):
                                                map_results_to_universal_tags(_pos_tag_sentence('stanza', doc),
                                                                              'stanza')]) == True
         assert all(
-            item in values for item in [i[1] for i  in
-                     map_results_to_universal_tags(_pos_tag_sentence('spacy', doc), 'spacy')]) == True
+            item in values for item in [i[1] for i in
+                                        map_results_to_universal_tags(_pos_tag_sentence('spacy', doc),
+                                                                      'spacy')]) == True
         assert all(
             item in values for item in
             [i[1] for i in map_results_to_universal_tags(_pos_tag_sentence('flair', doc), 'flair')]) == True
+        assert all(
+            item in values for item in
+            [i[1] for i in map_results_to_universal_tags(_pos_tag_sentence('article', doc), 'article')]) == True

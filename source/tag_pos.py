@@ -1,7 +1,7 @@
 """
 Module which tags POS given a list of sentences and a package
 """
-from source.pos_taggers_functions import nltk_pos_fct, stanza_pos_fct, spacy_pos_fct, flair_pos_fct
+from source.pos_taggers_functions import nltk_pos_fct, stanza_pos_fct, spacy_pos_fct, flair_pos_fct, article_gt
 import os
 from source.tokenizer_functions import tokenize
 import json
@@ -24,6 +24,8 @@ def _pos_tag_sentence(package_name: str, doc: str):
         return (stanza_pos_fct(tokenize(doc)))
     if pos_tagger == 'flair':
         return (flair_pos_fct(tokenize(doc)))
+    if pos_tagger == 'article':
+        return (article_gt(doc))
     return res
 
 
@@ -31,6 +33,7 @@ def _read_tag_map():
     with open(os.path.join(THIS_FOLDER, 'source/utils/tag_map.json')) as json_file:
         data = json.load(json_file)
     return data
+
 
 def map_results_to_universal_tags(raw_tokens: list, source: str):
     mapping = _read_tag_map()
@@ -45,5 +48,8 @@ def map_results_to_universal_tags(raw_tokens: list, source: str):
         results_mapped = [(tags[0], dict_mapping[tags[1]]) for tags in raw_tokens]
     if source == 'flair':
         dict_mapping = mapping['PTB-UNIV']
+        results_mapped = [(tags[0], dict_mapping[tags[1]]) for tags in raw_tokens]
+    if source == 'article':
+        dict_mapping = mapping['ARTICLE-UNIV']
         results_mapped = [(tags[0], dict_mapping[tags[1]]) for tags in raw_tokens]
     return results_mapped
