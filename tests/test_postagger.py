@@ -1,7 +1,7 @@
 """
 A series of tests to check that pos tagging for each package occurs as expected
 """
-from source.tag_pos import _pos_tag_sentence
+from source.tag_pos import _pos_tag_sentence, _read_tag_map
 import pytest
 from source.tokenizer_functions import tokenize
 
@@ -47,7 +47,14 @@ def test_each_package_returns_same_number_results(documents: list):
             'flair', doc))
 
 
-def test_each_token_has_a_tag():
+def test_each_token_has_a_tag(documents: list):
     """
     Check that each tag is a valid key in the tag_map
     """
+    mappings = _read_tag_map()
+    keys = list(mappings['UNIV'].keys()) + list(mappings['PTB-UNIV'].keys()) + list(mappings['ARTICLE-UNIV'].keys())
+    for doc in documents:
+        assert all(item in keys for item in [i[1] for i in _pos_tag_sentence('nltk', doc)]) == True
+        assert all(item in keys for item in [i[1] for i in _pos_tag_sentence('stanza', doc)]) == True
+        assert all(item in keys for item in [i[1] for i in _pos_tag_sentence('spacy', doc)]) == True
+        assert all(item in keys for item in [i[1] for i in _pos_tag_sentence('flair', doc)]) == True
