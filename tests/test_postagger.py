@@ -1,7 +1,7 @@
 """
 A series of tests to check that pos tagging for each package occurs as expected
 """
-from source.tag_pos import _pos_tag_sentence, _read_tag_map
+from source.tag_pos import _pos_tag_sentence, _read_tag_map, map_results_to_universal_tags
 import pytest
 from source.tokenizer_functions import tokenize
 
@@ -58,3 +58,25 @@ def test_each_token_has_a_tag(documents: list):
         assert all(item in keys for item in [i[1] for i in _pos_tag_sentence('stanza', doc)]) == True
         assert all(item in keys for item in [i[1] for i in _pos_tag_sentence('spacy', doc)]) == True
         assert all(item in keys for item in [i[1] for i in _pos_tag_sentence('flair', doc)]) == True
+
+
+def test_each_token_has_a_mapped_correct_tag(documents: list):
+    """
+    Check that each mapped tag is a valid value
+    """
+    mappings = _read_tag_map()
+    values = list(mappings['UNIV'].values()) + list(mappings['PTB-UNIV'].values()) + list(
+        mappings['ARTICLE-UNIV'].values())
+    for doc in documents:
+        assert all(
+            item in values for item in
+            [i[1] for i in map_results_to_universal_tags(_pos_tag_sentence('nltk', doc), 'nltk')]) == True
+        assert all(item in values for item in [i[1] for i in
+                                               map_results_to_universal_tags(_pos_tag_sentence('stanza', doc),
+                                                                             'stanza')]) == True
+        assert all(
+            item in values for item in [i[1] for i  in
+                     map_results_to_universal_tags(_pos_tag_sentence('spacy', doc), 'spacy')]) == True
+        assert all(
+            item in values for item in
+            [i[1] for i in map_results_to_universal_tags(_pos_tag_sentence('flair', doc), 'flair')]) == True

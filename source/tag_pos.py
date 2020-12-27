@@ -34,5 +34,16 @@ def _read_tag_map():
 
 def map_results_to_universal_tags(raw_tokens: list, source: str):
     mapping = _read_tag_map()
-    results_mapped = []
+    if source == 'nltk':
+        dict_mapping = mapping['PTB-UNIV']
+        results_mapped = [(tags[0], dict_mapping[tags[1]]) for tags in raw_tokens]
+    if source == 'stanza':
+        dict_mapping = mapping['PTB-UNIV']
+        results_mapped = [(tags[0], dict_mapping[tags[1]]) for tags in raw_tokens]
+    if source == 'spacy':
+        dict_mapping = mapping['UNIV']
+        results_mapped = [(tags[0], dict_mapping[tags[1]]) for tags in raw_tokens]
+    if source == 'flair':
+        dict_mapping = mapping['PTB-UNIV']
+        results_mapped = [(tags[0], dict_mapping[tags[1]]) for tags in raw_tokens]
     return results_mapped
