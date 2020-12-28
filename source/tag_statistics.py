@@ -11,7 +11,6 @@ def most_frequent(List):
 
 
 def return_majority_token(token_tags:list):
-    tags = [i[1] for i in token_tags]
     return most_frequent(token_tags)
 
 
