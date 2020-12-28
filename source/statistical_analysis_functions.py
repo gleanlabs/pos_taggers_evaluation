@@ -65,7 +65,7 @@ def df_tokens_2_agree_3_unique_and_same_GT():
     """when 2 libraries agree, the GT as well and 2 remaining libraries are voting for 2 other same tags"""
 
 
-def chart3():
+def chart4():
     """when 2 libraries agree, the GT as well and 2 remaining libraries are voting for 2 other same tags, what tend to be these libraries?"""
 
 
