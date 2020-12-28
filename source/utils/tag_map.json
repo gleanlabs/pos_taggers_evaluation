@@ -25,7 +25,8 @@
     "PART": "PART",
     "PUNCT": "PUNCT",
     "X": "X",
-    "INTJ": "INTJ"
+    "INTJ": "INTJ",
+    "#": "SYM"
   },
   "PTB-UNIV": {
     "CC": "CCONJ",
@@ -82,7 +83,8 @@
     "AFX": "X",
     "GW": "X",
     "WP$": "PRON",
-    "EX": "DET"
+    "EX": "DET",
+    "#": "SYM"
   },
   "ARTICLE-UNIV": {
     "&": "CCONJ",
@@ -99,7 +101,11 @@
     "!": "INTJ",
     "T": "PART",
     "X": "DET",
-    ",": "PUNCT"
+    ",": "PUNCT",
+    "=": "SYM",
+    "C": "X",
+    "@": "SYM",
+    "U": "SYM",
+    "E": "SYM"
   }
 }
-
