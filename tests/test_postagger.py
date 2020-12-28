@@ -5,6 +5,8 @@ from source.tag_pos import _pos_tag_sentence, _read_tag_map, map_results_to_univ
 import pytest
 from source.tokenizer_functions import tokenize
 
+LIST_PACKAGES = ['nltk', 'stanza', 'spacy', 'flair', 'article']
+
 
 @pytest.fixture
 def documents():
@@ -24,11 +26,8 @@ def test_tokens_for_each_packages(documents: list):
     # tokens are the same
     for doc in documents:
         flatten_list_tokens = [item for sublist in tokenize(doc) for item in sublist]
-        assert [i[0] for i in _pos_tag_sentence('nltk', doc)] == flatten_list_tokens
-        assert [i[0] for i in _pos_tag_sentence('stanza', doc)] == flatten_list_tokens
-        assert [i[0] for i in _pos_tag_sentence('spacy', doc)] == flatten_list_tokens
-        assert [i[0] for i in _pos_tag_sentence('flair', doc)] == flatten_list_tokens
-        assert [i[0] for i in _pos_tag_sentence('article', doc)] == flatten_list_tokens
+        for lib in LIST_PACKAGES:
+            assert [i[0] for i in _pos_tag_sentence(lib, doc)] == flatten_list_tokens
 
 
 def test_each_package_returns_same_number_results(documents: list):
@@ -38,15 +37,14 @@ def test_each_package_returns_same_number_results(documents: list):
     """
     # tokens are the same
     for doc in documents:
-        assert [i[0] for i in _pos_tag_sentence('nltk', doc)] == [i[0] for i in _pos_tag_sentence('stanza', doc)] == [
-            i[0] for i in _pos_tag_sentence('spacy', doc)] == [i[0] for i in _pos_tag_sentence('flair', doc)]
-    # same number of tokens
+        tokens_ref = [i[0] for i in _pos_tag_sentence(LIST_PACKAGES[0], doc)]
+        for lib in LIST_PACKAGES:
+            assert tokens_ref == [i[0] for i in _pos_tag_sentence(lib, doc)]
+            # same number of tokens
     for doc in documents:
-        assert len(_pos_tag_sentence('nltk', doc)) == len(_pos_tag_sentence('stanza', doc)) == len(
-            _pos_tag_sentence('spacy',
-                              doc)) == len(_pos_tag_sentence(
-            'flair', doc)) == len(_pos_tag_sentence(
-            'article', doc))
+        length_ref = len(_pos_tag_sentence(LIST_PACKAGES[0], doc))
+        for lib in LIST_PACKAGES:
+            assert length_ref == len(_pos_tag_sentence(lib, doc))
 
 
 def test_each_token_has_a_tag(documents: list):
@@ -56,11 +54,8 @@ def test_each_token_has_a_tag(documents: list):
     mappings = _read_tag_map()
     keys = list(mappings['UNIV'].keys()) + list(mappings['PTB-UNIV'].keys()) + list(mappings['ARTICLE-UNIV'].keys())
     for doc in documents:
-        assert all(item in keys for item in [i[1] for i in _pos_tag_sentence('nltk', doc)]) == True
-        assert all(item in keys for item in [i[1] for i in _pos_tag_sentence('stanza', doc)]) == True
-        assert all(item in keys for item in [i[1] for i in _pos_tag_sentence('spacy', doc)]) == True
-        assert all(item in keys for item in [i[1] for i in _pos_tag_sentence('flair', doc)]) == True
-        assert all(item in keys for item in [i[1] for i in _pos_tag_sentence('article', doc)]) == True
+        for lib in LIST_PACKAGES:
+            assert all(item in keys for item in [i[1] for i in _pos_tag_sentence(lib, doc)]) == True
 
 
 def test_each_token_has_a_mapped_correct_tag(documents: list):
@@ -71,19 +66,7 @@ def test_each_token_has_a_mapped_correct_tag(documents: list):
     values = list(mappings['UNIV'].values()) + list(mappings['PTB-UNIV'].values()) + list(
         mappings['ARTICLE-UNIV'].values())
     for doc in documents:
-        assert all(
-            item in values for item in
-            [i[1] for i in map_results_to_universal_tags(_pos_tag_sentence('nltk', doc), 'nltk')]) == True
-        assert all(item in values for item in [i[1] for i in
-                                               map_results_to_universal_tags(_pos_tag_sentence('stanza', doc),
-                                                                             'stanza')]) == True
-        assert all(
-            item in values for item in [i[1] for i in
-                                        map_results_to_universal_tags(_pos_tag_sentence('spacy', doc),
-                                                                      'spacy')]) == True
-        assert all(
-            item in values for item in
-            [i[1] for i in map_results_to_universal_tags(_pos_tag_sentence('flair', doc), 'flair')]) == True
-        assert all(
-            item in values for item in
-            [i[1] for i in map_results_to_universal_tags(_pos_tag_sentence('article', doc), 'article')]) == True
+        for lib in LIST_PACKAGES:
+            assert all(
+                item in values for item in
+                [i[1] for i in map_results_to_universal_tags(_pos_tag_sentence(lib, doc), lib)]) == True

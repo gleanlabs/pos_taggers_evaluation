@@ -23,6 +23,9 @@ def df_tokens_4_agree_and_different_GT():
 def df_tokens_3_agree_2_unique_and_different_GT():
     """when 3 libraries agree and not the GT which agrees with an other library"""
 
+#TODO: rename the chart
+#TODO: make a readme with charts as well
+#TODO: write a recommendation part for later use
 
 def chart1():
     """when 3 libraries agree and not the GT which agrees with an other library, which library it tends to be?"""
