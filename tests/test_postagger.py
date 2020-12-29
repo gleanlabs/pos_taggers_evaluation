@@ -19,6 +19,27 @@ def documents():
     return documents_list
 
 
+@pytest.fixture
+def documents_pos_tagging_article():
+    documents_list = [
+        "Using JavaScript's escape / unescape function is almost always the wrong thing , it is incompatible with URL-encoding or any other "
+        "standard encoding on the web . Non-ASCII characters are treated unexpectedly as well as spaces , and older browsers don't necessarily"
+        " have the same behaviour . As mentioned by roenving , the method you want is decodeURIComponent() . This is a newer addition which you "
+        "won't find on IE 5.0 , so if you need to support that browser ( let's hope not , nowadays ! ) you'd need to implement the function yourself ."
+        " And for non-ASCII characters that means you need to implement a UTF-8 encoder . Code is available if you need it ."
+    ]
+    return documents_list
+
+
+def test_pos_tagging_article(documents_pos_tagging_article: list):
+    """
+    The idea is to confirm that the document that is tagged is the same as the original tokenized document
+    """
+    # tokens are the same
+    for doc in documents_pos_tagging_article:
+        assert [i[1] for i in _pos_tag_sentence('article', doc)][1] == '^'
+
+
 def test_tokens_for_each_packages(documents: list):
     """
     The idea is to confirm that the document that is tagged is the same as the original tokenized document
