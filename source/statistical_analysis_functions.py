@@ -69,6 +69,7 @@ def chart_3_agree_different_GT_which_library_GT_tends_to_agree_with():
 
     ax = sns.countplot(x="lib_equals_GT", data=df_pos_exp)
     plt.show()
+    df_pos_exp.to_csv(os.path.join(THIS_FOLDER, 'source/utils/sentences_3_agree_2_unique_different_GT.csv'))
 
 
 def df_tokens_3_agree_3_unique_and_different_GT():
@@ -99,6 +100,7 @@ def chart_3_agree_same_GT_which_libraries_tends_to_agree_with_each_other():
                              if val != x[1]]]), axis=1)
     ax = sns.countplot(x="libraries_agreeing", data=df_pos_exp)
     plt.show()
+    df_pos_exp.to_csv(os.path.join(THIS_FOLDER, 'source/utils/sentences_3_agree_2_unique_same_GT.csv'))
 
 
 def df_tokens_3_agree_3_unique_and_same_GT():
@@ -141,6 +143,7 @@ def chart_2_agree_different_GT_which_library_GT_tends_to_agree_with():
 
     ax = sns.countplot(x="libraries_agreeing", data=df_pos_exp)
     plt.show()
+    df_pos_exp.to_csv(os.path.join(THIS_FOLDER, 'source/utils/sentences_2_agree_3_unique_different_GT.csv'))
 
 
 def df_tokens_2_agree_4_unique_and_same_GT():
@@ -178,6 +181,7 @@ def chart_2_agree_same_GT_which_libraries_tends_to_agree_with_each_other():
                                                                                    val == x[1]]]), axis=1)
     ax = sns.countplot(x="libraries_agreeing", data=df_pos_exp)
     plt.show()
+    df_pos_exp.to_csv(os.path.join(THIS_FOLDER, 'source/utils/sentences_2_agree_3_unique_same_GT.csv'))
 
 
 def df_tokens_1_agree():
