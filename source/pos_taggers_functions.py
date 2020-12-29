@@ -48,7 +48,7 @@ def split_labels_articles_that_need_to(gt):
         data = json.load(json_file)
     new_labels = []
     for gt_val in gt:
-        if gt_val[1] in ["Z", "S", "L", "M", "Y"]:
+        if gt_val[1] in ["Z", "S", "L", "M", "Y"] and gt_val[0] in data.keys():
             new_labels.append(dict_lab[gt_val[1]])
         elif gt_val[0] in data.keys():
             new_labels.append([gt_val[1], 'T'])

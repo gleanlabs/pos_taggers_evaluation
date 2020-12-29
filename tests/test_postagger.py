@@ -31,6 +31,14 @@ def documents_pos_tagging_article():
     return documents_list
 
 
+@pytest.fixture
+def documents_pos_tagging_article2():
+    documents_list = [
+        "Thats an approach I had not considered . I'd end up polling from the Javascript until something changes , but that might work ."
+    ]
+    return documents_list
+
+
 def test_pos_tagging_article(documents_pos_tagging_article: list):
     """
     The idea is to confirm that the document that is tagged is the same as the original tokenized document
@@ -38,6 +46,15 @@ def test_pos_tagging_article(documents_pos_tagging_article: list):
     # tokens are the same
     for doc in documents_pos_tagging_article:
         assert [i[1] for i in _pos_tag_sentence('article', doc)][1] == '^'
+
+
+def test_pos_tagging_article2(documents_pos_tagging_article2: list):
+    """
+    The idea is to confirm that the document that is tagged is the same as the original tokenized document
+    """
+    # tokens are the same
+    for doc in documents_pos_tagging_article2:
+        assert [i[1] for i in _pos_tag_sentence('article', doc)][2] == 'V'
 
 
 def test_tokens_for_each_packages(documents: list):

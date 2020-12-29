@@ -26,7 +26,7 @@ def df_new_column_with_votes_statistics():
      wether the manjority tag equals the GT and the libraries predictions"""
     df_pos = pd.read_csv(os.path.join(THIS_FOLDER, 'source/utils/sentences_to_GT_POS_libraries.csv'))
     df_pos['token_votes'] = df_pos[[lib + '_pos' for lib in LIST_PACKAGES]].apply(
-        lambda x: [[list_token_tags[0][0], list_token_tags[-1][1], list_token_tags, ags,
+        lambda x: [[list_token_tags[0][0], list_token_tags[-1][1], list_token_tags,
                     return_majority_token(list_token_tags),
                     return_number_votes_majority_token(
                         list_token_tags), return_unique_tokens(list_token_tags),
