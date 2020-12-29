@@ -191,3 +191,45 @@ def df_tokens_1_agree():
     df_pos_exp[
         (df_pos_exp['nb_votes_majority_token'] == 1)].to_csv(
         os.path.join(THIS_FOLDER, 'source/utils/sentences_1_agree.csv'))
+
+
+def revewing_dataset():
+    """here all libraries vote for different pos tags, see wether we keep the GT, we change it to an other library
+    pos tag that we trust more (be careful to final bias) or we mnually review it"""
+    df_pos = pd.read_csv(os.path.join(THIS_FOLDER, 'source/utils/sentences_to_GT_POS_libraries.csv'))
+    df_pos['token_votes'] = df_pos[[lib + '_pos' for lib in LIST_PACKAGES]].apply(
+        lambda x: [[list_token_tags[0][0], list_token_tags[-1][1], list_token_tags,
+                    return_majority_token(list_token_tags),
+                    return_number_votes_majority_token(
+                        list_token_tags), return_unique_tokens(list_token_tags),
+                    return_wether_majority_token_equals_gt(list_token_tags)] for list_token_tags in
+                   zip(*[ast.literal_eval(i) for i in x])], axis=1)
+
+    df_pos['article' + 'non_mapped_pos'] = df_pos['sentence'].apply(lambda x: _pos_tag_sentence('article', x))
+    for i in range(len(df_pos)):
+        token_votes = df_pos.loc[i, 'token_votes']
+        tok_gt = df_pos.loc[i,  'article' + 'non_mapped_pos']
+        new_tagging = []
+        for tok_gt, tok_votes in zip(tok_gt,token_votes):
+            if (tok_votes[4] == 5):
+                new_tagging.append((tok_gt[0], tok_gt[1]))
+            elif (tok_votes[4] == 4 and tok_votes[6] == 0):
+                if (tok_votes[1] == 'PROPN' and tok_votes[4] == 'NOUN'):
+                    new_tagging.append((tok_gt[0], tok_gt[1]))
+                elif (tok_votes[1] == 'PRON' and tok_votes[3] == 'DET'):
+                    new_tagging.append(("###" + tok_gt[0], tok_gt[1]))
+                else:
+                    new_tagging.append((tok_gt[0], tok_votes[3]))
+            elif (tok_votes[4] == 1):
+                new_tagging.append((tok_gt[0], tok_gt[1]))
+            else:
+                new_tagging.append(("###"+tok_gt[0], tok_gt[1]))
+
+        df_pos.loc[i, 'new_tagging'] = str(new_tagging)
+
+    print(df_pos)
+    df_pos[['sentence', 'new_tagging']].to_csv(
+        os.path.join(THIS_FOLDER, 'source/utils/reviewing_dataset.csv'))
+
+
+
