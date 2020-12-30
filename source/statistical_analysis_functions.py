@@ -49,6 +49,29 @@ def df_tokens_4_agree_and_different_GT():
         os.path.join(THIS_FOLDER, 'source/utils/sentences_4_agree_different_GT.csv'))
 
 
+def df_tokens_4_agree_and_same_GT():
+    df_pos_exp = pd.read_csv(os.path.join(THIS_FOLDER, 'source/utils/sentences_to_GT_POS_libraries_votes_exp.csv'))
+    df_pos_exp[
+        (df_pos_exp['nb_votes_majority_token'] == 4) & (df_pos_exp['is_majority_token_equals_gt'] == 1)].to_csv(
+        os.path.join(THIS_FOLDER, 'source/utils/sentences_4_agree_same_GT.csv'))
+
+
+def chart_4_agree_same_GT_what_is_the_other_library():
+    df_pos_exp = pd.read_csv(os.path.join(THIS_FOLDER, 'source/utils/sentences_4_agree_same_GT.csv'))
+    df_pos_exp['lib_equals_GT'] = df_pos_exp[['votes', 'GT']].apply(
+        lambda x: [LIST_PACKAGES[index_other_lib] for index_other_lib in
+                   [index for index, val in enumerate([i[1] for i in ast.literal_eval('[' + x[0][1:-1] + ']')])
+                    if val != x[1]]][0], axis=1)
+    df_pos_exp['library_other'] = df_pos_exp[['votes', 'GT']].apply(
+        lambda x: ' '.join([LIST_PACKAGES[index_other_lib] for index_other_lib in
+                   [index for index, val in enumerate([i[1] for i in ast.literal_eval('[' + x[0][1:-1] + ']')])
+                    if val != x[1]]][0]), axis=1)
+    ax = sns.countplot(x="lib_equals_GT", data=df_pos_exp)
+    plt.show()
+    df_pos_exp.to_csv(os.path.join(THIS_FOLDER, 'source/utils/sentences_4_agree_same_GT.csv'))
+
+
+
 def df_tokens_3_agree_2_unique_and_different_GT():
     """when 3 libraries agree and not the GT which agrees with an other library"""
     df_pos_exp = pd.read_csv(os.path.join(THIS_FOLDER, 'source/utils/sentences_to_GT_POS_libraries_votes_exp.csv'))
@@ -66,7 +89,6 @@ def chart_3_agree_different_GT_which_library_GT_tends_to_agree_with():
     df_pos_exp = pd.read_csv(os.path.join(THIS_FOLDER, 'source/utils/sentences_3_agree_2_unique_different_GT.csv'))
     df_pos_exp['lib_equals_GT'] = df_pos_exp[['votes', 'GT']].apply(
         lambda x: LIST_PACKAGES[[i[1] for i in ast.literal_eval('[' + x[0][1:-1] + ']')][:-1].index(x[1])], axis=1)
-
     ax = sns.countplot(x="lib_equals_GT", data=df_pos_exp)
     plt.show()
     df_pos_exp.to_csv(os.path.join(THIS_FOLDER, 'source/utils/sentences_3_agree_2_unique_different_GT.csv'))
@@ -206,30 +228,41 @@ def revewing_dataset():
                    zip(*[ast.literal_eval(i) for i in x])], axis=1)
 
     df_pos['article' + 'non_mapped_pos'] = df_pos['sentence'].apply(lambda x: _pos_tag_sentence('article', x))
+    nb1 = 0
+    nb2 = 0
     for i in range(len(df_pos)):
         token_votes = df_pos.loc[i, 'token_votes']
-        tok_gt = df_pos.loc[i,  'article' + 'non_mapped_pos']
+        tok_gt = df_pos.loc[i, 'article' + 'non_mapped_pos']
         new_tagging = []
-        for tok_gt, tok_votes in zip(tok_gt,token_votes):
+        votes = []
+        for tok_gt, tok_votes in zip(tok_gt, token_votes):
             if (tok_votes[4] == 5):
                 new_tagging.append((tok_gt[0], tok_gt[1]))
             elif (tok_votes[4] == 4 and tok_votes[6] == 0):
                 if (tok_votes[1] == 'PROPN' and tok_votes[4] == 'NOUN'):
                     new_tagging.append((tok_gt[0], tok_gt[1]))
+                    votes.append((tok_gt[0], tok_gt[1]))
                 elif (tok_votes[1] == 'PRON' and tok_votes[3] == 'DET'):
                     new_tagging.append(("###" + tok_gt[0], tok_gt[1]))
+                    votes.append(("###" + tok_gt[0], tok_votes[2]))
                 else:
                     new_tagging.append((tok_gt[0], tok_votes[3]))
             elif (tok_votes[4] == 1):
                 new_tagging.append((tok_gt[0], tok_gt[1]))
+                votes.append((tok_gt[0], tok_gt[1]))
             else:
-                new_tagging.append(("###"+tok_gt[0], tok_gt[1]))
+                new_tagging.append(("###" + tok_gt[0], tok_gt[1]))
+                votes.append(("###" + tok_gt[0], tok_votes[2]))
+                if i <= 500:
+                    nb1 += 1
+                if i > 500:
+                    nb2 += 1
 
         df_pos.loc[i, 'new_tagging'] = str(new_tagging)
+        df_pos.loc[i, 'votes'] = str(votes)
 
+    print(nb1)
+    print(nb2)
     print(df_pos)
     df_pos[['sentence', 'new_tagging']].to_csv(
         os.path.join(THIS_FOLDER, 'source/utils/reviewing_dataset.csv'))
-
-
-
