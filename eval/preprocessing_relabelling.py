@@ -14,7 +14,7 @@ from textblob.base import BaseTokenizer
 spacy.load('en_core_web_sm')
 import numpy as np
 
-df_pos = pd.read_csv('sentences_to_GT_POS.csv')
+df_pos = pd.read_csv('eval/sentences_to_GT_POS_corrected_Basel.csv')
 df_pos['sentence_tok'] = df_pos['sentence'].apply(lambda x: x.split())
 df_pos['GT'] = df_pos['tagged_tokens_GT'].apply(lambda x: [i[1] for i in ast.literal_eval(x)])
 

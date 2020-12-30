@@ -1,98 +1,62 @@
-import pandas as pd
-import nltk
-from tokenizer.treebankwordtokenizer import RevisedTreeBankWordTokenizer
-from tokenizer.treebankwordtokenizer_spacy_whitespace import RevisedTreeBankWordTokenizerVocab
-import stanza
-import en_core_web_sm
-# stanza.download('en')
 import spacy
 from sklearn.metrics import precision_score, recall_score, accuracy_score
+from source.tag_pos import _read_tag_map, map_results_to_universal_tags, _pos_tag_sentence
+from source.pos_taggers_functions import split_labels_articles_that_need_to
+from source.tokenizer_functions import tokenize
+import nltk
 
 spacy.load('en_core_web_sm')
+import pandas as pd
 import numpy as np
+import ast
 
-ARTICLE_TO_UNIVERSAL_MAP = dict([
-    ("&", "CONJ"), ("$", "NUM"), ("D", "DET"), ("P", "SCONJ/ADP"), ("A", "ADJ"), ("N", "NOUN"),
-    ("O", "PRON"), ("R", "ADV"), ("V", "VERB"), ("^", "PROPN"), ("G", "SYM"), ("!", "INTJ"), ("T", "PART"),
-    ("X", "DET"), (",", "PUNCT")
-])
-
-PENN_TREEBANK_TO_UNIVERSAL_MAP = dict([
-    ("CC", "CONJ"), ("CD", "NUM"), ("DT", "DET"), ("PDT", "DET"), ("FW", "X"), ("IN", "SCONJ/ADP"), ("JJ", "ADJ"),
-    ("JJR", "ADJ"),
-    ("JJS", "ADJ"), ("NN", "NOUN"), ("NNS", "NOUN"), ("MD", "VERB"),
-    ("PRT", "PRT"), ("PRP", "PRON"), ("RB", "ADV"), ("RBR", "ADV"), ("RBS", "ADV"), ("WRB", "ADV"), ("VB", "VERB"),
-    ("VBD", "VERB"),
-    ("VBG", "VERB"), ("VBN", "VERB"), ("VBP", "VERB"), ("VBZ", "VERB"), ("NNP", "PROPN"),
-    ("NNPS", "PROPN"), ("SYM", "SYM"), ("RP", "PART"),
-    (".", "PUNCT"), ("UH", "INTJ"), ("POS", "PRON"), ("PRP$", "PRON"), ("WDT", "DET"),
-    ("WP", "PRON"), ("TO", "SCONJ/ADP"), ("-LRB-", "PUNCT"), ("RRB-", "PUNCT"), ('-RRB-', "PUNCT"), ("NFP", "PUNCT"),
-    ("HYPH", "PUNCT")
-    , ("FW", "X"), ("LS", "X"), ("XX", "X"), ("ADD", "X"), ("AFX", "X"), ("GW", "X")
-])
-UNIVERSAL_MAP = dict([
-    ("ADP", "SCONJ/ADP"),
-    ("SCONJ", "SCONJ/ADP")
-])
+# df_Jo  = pd.read_csv('reviewing_dataset_Johanna.csv')
+# df_Basel  = pd.read_csv('sentences_to_GT_POS_corrected_Basel.csv')
+# for i in range(len(df_Jo)):
+#     if i <=499:
+#         df_Basel.loc[i, 'GT_POS'] = str([i[1] if type(i[1])==str else i[1][1] for i in ast.literal_eval(df_Jo.loc[i,'new_tagging_corrected'])])
+#
+# df_Basel.to_csv('sentences_to_GT_POS_corrected_Basel_Jo.csv')
 
 
-sentences = ['URL decoding in Javascript', 'How to register a JavaScript callback in a Java Applet ?',
-             'I would not disagree with this .',
-             'You can deploy both WARs in the same EAR and put common resources in the EAR . Then put the appropriate dependencies in the manifest of the web apps to link to the jar files in the ear .',
-             'Which JavaScript library you recommend to use with Java EE + Struts + iBatis ?']
-
-sentences_gt = [["^", "V", "P", "^"], ["R", "P", "V", "D", "^", "N", "P", "D", "^", "N", ","],
-                ["O", "V", "R", "V", "P", "D", ","],
-                ["O", "V", "P", "D", "^", "P", "D", "A", "^", "&", "V", "N", "N", "P", "D", "^", ",", "R", "V", "D",
-                 "A", "N", "P", "D", "N", "P", "D", "N", "N", "P", "N", "P", "D", "^", "N", "P", "D", "^", ","],
-                ["O", "^", "N", "O", "V", "P", "V", "P", "^", "^", "&", "^", "&", "^", ","]]
-print('GT before mapping:' + str(sentences_gt))
-sentences_gt_ptb = [[ARTICLE_TO_UNIVERSAL_MAP[pos] if pos in ARTICLE_TO_UNIVERSAL_MAP else "[UNK]" for pos in sent_pos]
-                    for sent_pos
-                    in sentences_gt]
-print('GT:' + str(sentences_gt_ptb))
-
-tokenizer = RevisedTreeBankWordTokenizer()
+df = pd.read_csv('sentences_to_GT_POS_corrected_Basel.csv')
+mapping = _read_tag_map()
+dict_mapping = mapping['ARTICLE-UNIV']
+df['GT'] = df[['sentence', 'GT_POS']].apply(
+    lambda x: split_labels_articles_that_need_to(
+        [(i, j) for i, j in
+         zip([item for sublist in [text.split(' ') for text in nltk.sent_tokenize(x[0])] for item in sublist],
+             ast.literal_eval(x[1]))]), axis=1)
+print('GT')
+print(df['GT'])
 
 # nltk
-sentences_tok = [tokenizer.tokenize(sent) for sent in sentences]
-pos_nltk = [[pos[1] for pos in nltk.pos_tag(sent)] for sent in sentences_tok]
-print('nltk before mapping:' + str(pos_nltk))
-pos_nltk_univ = [
-    [PENN_TREEBANK_TO_UNIVERSAL_MAP[pos] if pos in PENN_TREEBANK_TO_UNIVERSAL_MAP else "[UNK]" for pos in
-     sent_pos] for
-    sent_pos in pos_nltk]
-print('nltk:' + str(pos_nltk_univ))
+df['nltk'] = df['sentence'].apply(
+    lambda x: [i[1] for i in map_results_to_universal_tags(_pos_tag_sentence('nltk', x), 'nltk')])
+print('nltk')
+
+df['same'] = df[['GT', 'nltk']].apply(lambda x: 1 if len(x[0]) == len(x[1]) else 0, axis=1)
+df = df[df.same == 1]
+print(len([item for sublist in df['nltk'].tolist() for item in sublist]))
+print(len([item for sublist in df['GT'].tolist() for item in sublist]))
 
 # stanza
-nlp_stanza = stanza.Pipeline(lang='en', processors='tokenize,pos', tokenize_pretokenized=True)
-sentences_stanza = nlp_stanza(sentences_tok)
-pos_stanza = [[word.xpos for word in s.words] for s in sentences_stanza.sentences]
-print('stanza before mapping:' + str(pos_stanza))
-pos_stanza_univ = [
-    [PENN_TREEBANK_TO_UNIVERSAL_MAP[pos] if pos in PENN_TREEBANK_TO_UNIVERSAL_MAP else "[UNK]" for pos in
-     sent_pos] for
-    sent_pos in pos_stanza]
-print('stanza:' + str(pos_stanza_univ))
+df['stanza'] = df['sentence'].apply(
+    lambda x: [i[1] for i in map_results_to_universal_tags(_pos_tag_sentence('stanza', x), 'stanza')])
+print('stanza')
+print(len([item for sublist in df['stanza'].tolist() for item in sublist]))
+df['same'] = df[['GT', 'stanza']].apply(lambda x: 1 if len(x[0]) == len(x[1]) else 0, axis=1)
+df = df[df.same == 1]
 
 # spacy
-nlp_spacy = en_core_web_sm.load()
-nlp_spacy.tokenizer = RevisedTreeBankWordTokenizerVocab(nlp_spacy.vocab)
-sentences_spacy = [nlp_spacy(sentence) for sentence in sentences]
-pos_spacy = [[word.pos_ for word in sentence] for sentence in sentences_spacy]
-print('spacy before mapping:' + str(pos_spacy))
-pos_spacy_univ = [
-    [UNIVERSAL_MAP[pos] if pos in UNIVERSAL_MAP else pos for pos in
-     sent_pos] for
-    sent_pos in pos_spacy]
-print('spacy:' + str(pos_spacy_univ))
+df['spacy'] = df['sentence'].apply(
+    lambda x: [i[1] for i in map_results_to_universal_tags(_pos_tag_sentence('spacy', x), 'spacy')])
+print('spacy')
 
-data = {'sentences': sentences,
-        'nltk': pos_nltk_univ,
-        'spacy': pos_spacy_univ,
-        'stanza': pos_stanza_univ,
-        'GT': sentences_gt_ptb,
-        }
+df['same'] = df[['GT', 'spacy']].apply(lambda x: 1 if len(x[0]) == len(x[1]) else 0, axis=1)
+df = df[df.same == 1]
+
+print(len([item for sublist in df['spacy'].tolist() for item in sublist]))
 
 
 def good_predictions(pred, gt):
@@ -103,9 +67,6 @@ def good_predictions_nouns(pred, gt):
     return sum(
         [1 for pred_val, gt_val in zip(pred, gt) if (pred_val == gt_val and gt_val == 'NOUN' or gt_val == 'PROPN')])
 
-
-# test set
-df = pd.DataFrame(data)
 
 df['num_tokens'] = pd.Series(df['GT']).apply(len)
 df['nltk_nb_good_predictions'] = df[['nltk', 'GT']].apply(lambda x: good_predictions(x[0], x[1]), axis=1)
@@ -118,75 +79,83 @@ df['stanza_nb_good_predictions_nouns'] = df[['stanza', 'GT']].apply(lambda x: go
 df['num_tokens'] = pd.Series(df['GT']).apply(len)
 
 df.to_csv('test_set_pos_tagging.csv')
+#
+# df_final = pd.DataFrame(np.array([[np.sum(df['nltk_nb_good_predictions']) / np.sum(df['num_tokens']),
+#                                    np.mean(df[['nltk', 'GT']].apply(lambda x: recall_score(
+#                                        [1 if (gt_val == 'NOUN' or gt_val == 'PROPN') else 0 for gt_val in x[1]],
+#                                        [1 if (gt_val == 'NOUN' or gt_val == 'PROPN') else 0 for gt_val in x[0]]),
+#                                                                     axis=1)),
+#                                    np.mean(df[['nltk', 'GT']].apply(lambda x: precision_score(
+#                                        [1 if (gt_val == 'NOUN' or gt_val == 'PROPN') else 0 for gt_val in x[1]],
+#                                        [1 if (gt_val == 'NOUN' or gt_val == 'PROPN') else 0 for gt_val in x[0]]),
+#                                                                     axis=1)),
+#                                    np.mean(df[['nltk', 'GT']].apply(lambda x: accuracy_score(
+#                                        [1 if (gt_val == 'NOUN' or gt_val == 'PROPN') else 0 for gt_val in x[1]],
+#                                        [1 if (gt_val == 'NOUN' or gt_val == 'PROPN') else 0 for gt_val in x[0]]),
+#                                                                     axis=1))],
+#                                   [np.sum(df['spacy_nb_good_predictions']) / np.sum(df['num_tokens']),
+#                                    np.mean(df[['spacy', 'GT']].apply(lambda x: recall_score(
+#                                        [1 if (gt_val == 'NOUN' or gt_val == 'PROPN') else 0 for gt_val in x[1]],
+#                                        [1 if (gt_val == 'NOUN' or gt_val == 'PROPN') else 0 for gt_val in x[0]]),
+#                                                                      axis=1)),
+#                                    np.mean(df[['spacy', 'GT']].apply(lambda x: precision_score(
+#                                        [1 if (gt_val == 'NOUN' or gt_val == 'PROPN') else 0 for gt_val in x[1]],
+#                                        [1 if (gt_val == 'NOUN' or gt_val == 'PROPN') else 0 for gt_val in x[0]]),
+#                                                                      axis=1)),
+#                                    np.mean(df[['spacy', 'GT']].apply(lambda x: accuracy_score(
+#                                        [1 if (gt_val == 'NOUN' or gt_val == 'PROPN') else 0 for gt_val in x[1]],
+#                                        [1 if (gt_val == 'NOUN' or gt_val == 'PROPN') else 0 for gt_val in x[0]]),
+#                                                                      axis=1))],
+#                                   [np.sum(df['stanza_nb_good_predictions']) / np.sum(df['num_tokens']),
+#                                    np.mean(df[['stanza', 'GT']].apply(lambda x: recall_score(
+#                                        [1 if (gt_val == 'NOUN' or gt_val == 'PROPN') else 0 for gt_val in x[1]],
+#                                        [1 if (gt_val == 'NOUN' or gt_val == 'PROPN') else 0 for gt_val in x[0]]),
+#                                                                       axis=1)),
+#                                    np.mean(df[['stanza', 'GT']].apply(lambda x: precision_score(
+#                                        [1 if (gt_val == 'NOUN' or gt_val == 'PROPN') else 0 for gt_val in x[1]],
+#                                        [1 if (gt_val == 'NOUN' or gt_val == 'PROPN') else 0 for gt_val in x[0]]),
+#                                                                       axis=1)),
+#                                    np.mean(df[['stanza', 'GT']].apply(lambda x: accuracy_score(
+#                                        [1 if (gt_val == 'NOUN' or gt_val == 'PROPN') else 0 for gt_val in x[1]],
+#                                        [1 if (gt_val == 'NOUN' or gt_val == 'PROPN') else 0 for gt_val in x[0]]),
+#                                                                       axis=1))]]),
+#                         columns=['all tokens', 'nouns_recall', 'nouns_precision', 'nouns_accuracy'],
+#                         index=['nltk', 'spacy', 'stanza'])
+#
+# df_final.to_csv('final.csv')
 
+flat_list_nltk = [item for sublist in df['nltk'].tolist() for item in sublist]
+flat_list_spacy = [item for sublist in df['spacy'].tolist() for item in sublist]
+flat_list_stanza = [item for sublist in df['stanza'].tolist() for item in sublist]
+flat_list_gt = [item for sublist in df['GT'].tolist() for item in sublist]
 
-df_final = pd.DataFrame(np.array([[np.sum(df['nltk_nb_good_predictions']) / np.sum(df['num_tokens']),
-                                   np.mean(df[['nltk', 'GT']].apply(lambda x: recall_score(
-                                       [1 if (gt_val == 'NOUN' or gt_val == 'PROPN') else 0 for gt_val in x[1]],
-                                       [1 if (gt_val == 'NOUN' or gt_val == 'PROPN') else 0 for gt_val in x[0]]),
-                                                                    axis=1)),
-                                   np.mean(df[['nltk', 'GT']].apply(lambda x: precision_score(
-                                       [1 if (gt_val == 'NOUN' or gt_val == 'PROPN') else 0 for gt_val in x[1]],
-                                       [1 if (gt_val == 'NOUN' or gt_val == 'PROPN') else 0 for gt_val in x[0]]),
-                                                                    axis=1)),
-                                   np.mean(df[['nltk', 'GT']].apply(lambda x: accuracy_score(
-                                       [1 if (gt_val == 'NOUN' or gt_val == 'PROPN') else 0 for gt_val in x[1]],
-                                       [1 if (gt_val == 'NOUN' or gt_val == 'PROPN') else 0 for gt_val in x[0]]),
-                                                                    axis=1))],
-                                  [np.sum(df['spacy_nb_good_predictions']) / np.sum(df['num_tokens']),
-                                   np.mean(df[['spacy', 'GT']].apply(lambda x: recall_score(
-                                       [1 if (gt_val == 'NOUN' or gt_val == 'PROPN') else 0 for gt_val in x[1]],
-                                       [1 if (gt_val == 'NOUN' or gt_val == 'PROPN') else 0 for gt_val in x[0]]),
-                                                                     axis=1)),
-                                   np.mean(df[['spacy', 'GT']].apply(lambda x: precision_score(
-                                       [1 if (gt_val == 'NOUN' or gt_val == 'PROPN') else 0 for gt_val in x[1]],
-                                       [1 if (gt_val == 'NOUN' or gt_val == 'PROPN') else 0 for gt_val in x[0]]),
-                                                                     axis=1)),
-                                   np.mean(df[['spacy', 'GT']].apply(lambda x: accuracy_score(
-                                       [1 if (gt_val == 'NOUN' or gt_val == 'PROPN') else 0 for gt_val in x[1]],
-                                       [1 if (gt_val == 'NOUN' or gt_val == 'PROPN') else 0 for gt_val in x[0]]),
-                                                                     axis=1))],
-                                  [np.sum(df['stanza_nb_good_predictions']) / np.sum(df['num_tokens']),
-                                   np.mean(df[['stanza', 'GT']].apply(lambda x: recall_score(
-                                       [1 if (gt_val == 'NOUN' or gt_val == 'PROPN') else 0 for gt_val in x[1]],
-                                       [1 if (gt_val == 'NOUN' or gt_val == 'PROPN') else 0 for gt_val in x[0]]),
-                                                                      axis=1)),
-                                   np.mean(df[['stanza', 'GT']].apply(lambda x: precision_score(
-                                       [1 if (gt_val == 'NOUN' or gt_val == 'PROPN') else 0 for gt_val in x[1]],
-                                       [1 if (gt_val == 'NOUN' or gt_val == 'PROPN') else 0 for gt_val in x[0]]),
-                                                                      axis=1)),
-                                   np.mean(df[['stanza', 'GT']].apply(lambda x: accuracy_score(
-                                       [1 if (gt_val == 'NOUN' or gt_val == 'PROPN') else 0 for gt_val in x[1]],
-                                       [1 if (gt_val == 'NOUN' or gt_val == 'PROPN') else 0 for gt_val in x[0]]),
-                                                                      axis=1))]]),
-                        columns=['all tokens', 'nouns_recall', 'nouns_precision', 'nouns_accuracy'],
-                        index=['nltk', 'spacy', 'stanza'])
-
-
-
-
-df_final.to_csv('final.csv')
 from sklearn.metrics import confusion_matrix
-y_true = ["cat", "ant", "cat", "cat", "ant", "bird"]
-y_pred = ["ant", "ant", "cat", "cat", "ant", "cat"]
-confusion_matrix(y_true, y_pred, labels=["ant", "bird", "cat"])
 
+array_nltk = confusion_matrix(flat_list_gt, flat_list_nltk, labels=list(set(flat_list_nltk)))
+array_spacy = confusion_matrix(flat_list_gt, flat_list_spacy, labels=list(set(flat_list_spacy)))
+array_stanza = confusion_matrix(flat_list_gt, flat_list_stanza, labels=list(set(flat_list_stanza)))
 
 import seaborn as sn
 import pandas as pd
 import matplotlib.pyplot as plt
-array = [[33,2,0,0,0,0,0,0,0,1,3],
-        [3,31,0,0,0,0,0,0,0,0,0],
-        [0,4,41,0,0,0,0,0,0,0,1],
-        [0,1,0,30,0,6,0,0,0,0,1],
-        [0,0,0,0,38,10,0,0,0,0,0],
-        [0,0,0,3,1,39,0,0,0,0,4],
-        [0,2,2,0,4,1,31,0,0,0,2],
-        [0,1,0,0,0,0,0,36,0,2,0],
-        [0,0,0,0,0,0,1,5,37,5,1],
-        [3,0,0,0,0,0,0,0,0,39,0],
-        [0,0,0,0,0,0,0,0,0,0,38]]
-df_cm = pd.DataFrame(array, index = [i for i in "ABCDEFGHIJK"],
-                  columns = [i for i in "ABCDEFGHIJK"])
-plt.figure(figsize = (10,7))
+
+df_cm = pd.DataFrame(array_nltk, index=[i for i in list(set(flat_list_nltk))],
+                     columns=[i for i in list(set(flat_list_nltk))])
+plt.figure(figsize=(10, 7))
 sn.heatmap(df_cm, annot=True)
+plt.title('nltk confusion matrix')
+plt.show()
+
+df_cm = pd.DataFrame(array_spacy, index=[i for i in list(set(flat_list_spacy))],
+                     columns=[i for i in list(set(flat_list_spacy))])
+plt.figure(figsize=(10, 7))
+sn.heatmap(df_cm, annot=True)
+plt.title('spacy confusion matrix')
+plt.show()
+
+df_cm = pd.DataFrame(array_stanza, index=[i for i in list(set(flat_list_stanza))],
+                     columns=[i for i in list(set(flat_list_stanza))])
+plt.figure(figsize=(10, 7))
+sn.heatmap(df_cm, annot=True)
+plt.title('stanza confusion matrix')
+plt.show()

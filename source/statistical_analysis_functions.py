@@ -14,7 +14,7 @@ LIST_PACKAGES = ['nltk', 'stanza', 'spacy', 'flair', 'article']
 
 def create_df_all_sentences():
     """create the df with pos tags given by each libraries, for each sentence"""
-    df_pos = pd.read_csv(os.path.join(THIS_FOLDER, 'source/utils/sentences_to_GT_POS.csv'))
+    df_pos = pd.read_csv(os.path.join(THIS_FOLDER, 'source/utils/sentences_to_GT_POS_corrected_Basel.csv'))
     for index, doc in enumerate(df_pos['sentence'].tolist()):
         for lib in LIST_PACKAGES:
             df_pos.loc[index, lib + '_pos'] = str(map_results_to_universal_tags(_pos_tag_sentence(lib, doc), lib))
@@ -265,4 +265,4 @@ def revewing_dataset():
     print(nb2)
     print(df_pos)
     df_pos[['sentence', 'new_tagging','votes']].to_csv(
-        os.path.join(THIS_FOLDER, 'source/utils/reviewing_dataset.csv'))
+        os.path.join(THIS_FOLDER, 'source/utils/reviewing_dataset_Johanna.csv'))

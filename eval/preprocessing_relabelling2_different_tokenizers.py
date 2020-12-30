@@ -45,7 +45,7 @@ def get_index(text_tok):
     return offsets
 
 
-df_pos = pd.read_csv('sentences_to_GT_POS.csv')
+df_pos = pd.read_csv('eval/sentences_to_GT_POS_corrected_Basel.csv')
 df_pos['GT'] = df_pos['tagged_tokens_GT'].apply(lambda x: [i[1] for i in ast.literal_eval(x)])
 df_pos['sentence_tok'] = df_pos[['sentence', 'GT']].apply(lambda x: split_tok_articles_that_need_to(x[0], x[1]), axis=1)
 df_pos['GT'] = df_pos[['sentence', 'GT']].apply(lambda x: split_labels_articles_that_need_to(x[0], x[1]), axis=1)
