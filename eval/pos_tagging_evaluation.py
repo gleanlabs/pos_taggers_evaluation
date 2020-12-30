@@ -14,7 +14,7 @@ import ast
 # df_Basel  = pd.read_csv('sentences_to_GT_POS_corrected_Basel.csv')
 # for i in range(len(df_Jo)):
 #     if i <=499:
-#         df_Basel.loc[i, 'GT_POS'] = str([i[1] if type(i[1])==str else i[1][1] for i in ast.literal_eval(df_Jo.loc[i,'new_tagging_corrected'])])
+#         df_Basel.loc[i, 'GT_POS'] = str([i[1] if type(i[1])==str else i[1][1] for i in ast.literal_eval(df_Jo.loc[i,'new_tagging'])])
 #
 # df_Basel.to_csv('sentences_to_GT_POS_corrected_Basel_Jo.csv')
 
@@ -23,10 +23,10 @@ df = pd.read_csv('sentences_to_GT_POS_corrected_Basel.csv')
 mapping = _read_tag_map()
 dict_mapping = mapping['ARTICLE-UNIV']
 df['GT'] = df[['sentence', 'GT_POS']].apply(
-    lambda x: split_labels_articles_that_need_to(
+    lambda x: [dict_mapping[gt] for gt in split_labels_articles_that_need_to(
         [(i, j) for i, j in
          zip([item for sublist in [text.split(' ') for text in nltk.sent_tokenize(x[0])] for item in sublist],
-             ast.literal_eval(x[1]))]), axis=1)
+             ast.literal_eval(x[1]))])], axis=1)
 print('GT')
 print(df['GT'])
 
@@ -58,27 +58,30 @@ df = df[df.same == 1]
 
 print(len([item for sublist in df['spacy'].tolist() for item in sublist]))
 
-
-def good_predictions(pred, gt):
-    return sum([1 for pred_val, gt_val in zip(pred, gt) if pred_val == gt_val])
-
-
-def good_predictions_nouns(pred, gt):
-    return sum(
-        [1 for pred_val, gt_val in zip(pred, gt) if (pred_val == gt_val and gt_val == 'NOUN' or gt_val == 'PROPN')])
-
-
-df['num_tokens'] = pd.Series(df['GT']).apply(len)
-df['nltk_nb_good_predictions'] = df[['nltk', 'GT']].apply(lambda x: good_predictions(x[0], x[1]), axis=1)
-df['spacy_nb_good_predictions'] = df[['spacy', 'GT']].apply(lambda x: good_predictions(x[0], x[1]), axis=1)
-df['stanza_nb_good_predictions'] = df[['stanza', 'GT']].apply(lambda x: good_predictions(x[0], x[1]), axis=1)
-df['nltk_nb_good_predictions_nouns'] = df[['nltk', 'GT']].apply(lambda x: good_predictions_nouns(x[0], x[1]), axis=1)
-df['spacy_nb_good_predictions_nouns'] = df[['spacy', 'GT']].apply(lambda x: good_predictions_nouns(x[0], x[1]), axis=1)
-df['stanza_nb_good_predictions_nouns'] = df[['stanza', 'GT']].apply(lambda x: good_predictions_nouns(x[0], x[1]),
-                                                                    axis=1)
-df['num_tokens'] = pd.Series(df['GT']).apply(len)
-
 df.to_csv('test_set_pos_tagging.csv')
+
+
+#
+# def good_predictions(pred, gt):
+#     return sum([1 for pred_val, gt_val in zip(pred, gt) if pred_val == gt_val])
+#
+#
+# def good_predictions_nouns(pred, gt):
+#     return sum(
+#         [1 for pred_val, gt_val in zip(pred, gt) if (pred_val == gt_val and gt_val == 'NOUN' or gt_val == 'PROPN')])
+#
+#
+# df['num_tokens'] = pd.Series(df['GT']).apply(len)
+# df['nltk_nb_good_predictions'] = df[['nltk', 'GT']].apply(lambda x: good_predictions(x[0], x[1]), axis=1)
+# df['spacy_nb_good_predictions'] = df[['spacy', 'GT']].apply(lambda x: good_predictions(x[0], x[1]), axis=1)
+# df['stanza_nb_good_predictions'] = df[['stanza', 'GT']].apply(lambda x: good_predictions(x[0], x[1]), axis=1)
+# df['nltk_nb_good_predictions_nouns'] = df[['nltk', 'GT']].apply(lambda x: good_predictions_nouns(x[0], x[1]), axis=1)
+# df['spacy_nb_good_predictions_nouns'] = df[['spacy', 'GT']].apply(lambda x: good_predictions_nouns(x[0], x[1]), axis=1)
+# df['stanza_nb_good_predictions_nouns'] = df[['stanza', 'GT']].apply(lambda x: good_predictions_nouns(x[0], x[1]),
+#                                                                     axis=1)
+# df['num_tokens'] = pd.Series(df['GT']).apply(len)
+#
+
 #
 # df_final = pd.DataFrame(np.array([[np.sum(df['nltk_nb_good_predictions']) / np.sum(df['num_tokens']),
 #                                    np.mean(df[['nltk', 'GT']].apply(lambda x: recall_score(
@@ -124,38 +127,59 @@ df.to_csv('test_set_pos_tagging.csv')
 #
 # df_final.to_csv('final.csv')
 
-flat_list_nltk = [item for sublist in df['nltk'].tolist() for item in sublist]
-flat_list_spacy = [item for sublist in df['spacy'].tolist() for item in sublist]
-flat_list_stanza = [item for sublist in df['stanza'].tolist() for item in sublist]
-flat_list_gt = [item for sublist in df['GT'].tolist() for item in sublist]
+df = pd.read_csv('test_set_pos_tagging.csv')[500:]
 
+df['nltk'] = df['nltk'].apply(lambda x: ast.literal_eval(x))
+df['spacy'] = df['spacy'].apply(lambda x: ast.literal_eval(x))
+df['stanza'] = df['stanza'].apply(lambda x: ast.literal_eval(x))
+df['GT'] = df['GT'].apply(lambda x: ast.literal_eval(x))
+
+df['agree'] = df[['nltk', 'spacy', 'stanza']].apply(
+    lambda x: [1 if nl == sp == st else 0 for nl, sp, st in zip(x[0], x[1], x[2])], axis=1)
+flat_list_nltk = [item for sublist in
+                  df[['nltk', 'agree']].apply(lambda x: [nltk for nltk, agree in zip(x[0], x[1]) if agree == 0],
+                                              axis=1).tolist() for
+                  item in sublist]
+flat_list_spacy = [item for sublist in
+                   df[['spacy', 'agree']].apply(lambda x: [nltk for nltk, agree in zip(x[0], x[1]) if agree == 0],
+                                                axis=1).tolist() for
+                   item in sublist]
+flat_list_stanza = [item for sublist in
+                    df[['stanza', 'agree']].apply(lambda x: [nltk for nltk, agree in zip(x[0], x[1]) if agree == 0],
+                                                  axis=1).tolist() for
+                    item in sublist]
+flat_list_gt = [item for sublist in
+                df[['GT', 'agree']].apply(lambda x: [nltk for nltk, agree in zip(x[0], x[1]) if agree == 0],
+                                          axis=1).tolist() for item in
+                sublist]
+print(len(flat_list_nltk) == len(flat_list_spacy) == len(flat_list_stanza) == len(flat_list_gt))
 from sklearn.metrics import confusion_matrix
 
-array_nltk = confusion_matrix(flat_list_gt, flat_list_nltk, labels=list(set(flat_list_nltk)))
-array_spacy = confusion_matrix(flat_list_gt, flat_list_spacy, labels=list(set(flat_list_spacy)))
-array_stanza = confusion_matrix(flat_list_gt, flat_list_stanza, labels=list(set(flat_list_stanza)))
+array_nltk = confusion_matrix(flat_list_gt, flat_list_nltk, labels=list(set(flat_list_gt)))
+array_spacy = confusion_matrix(flat_list_gt, flat_list_spacy, labels=list(set(flat_list_gt)))
+array_stanza = confusion_matrix(flat_list_gt, flat_list_stanza, labels=list(set(flat_list_gt)))
 
 import seaborn as sn
 import pandas as pd
 import matplotlib.pyplot as plt
 
-df_cm = pd.DataFrame(array_nltk, index=[i for i in list(set(flat_list_nltk))],
-                     columns=[i for i in list(set(flat_list_nltk))])
+df_cm = pd.DataFrame(array_nltk, index=[i for i in list(set(flat_list_gt))],
+                     columns=[i for i in list(set(flat_list_gt))])
 plt.figure(figsize=(10, 7))
-sn.heatmap(df_cm, annot=True)
-plt.title('nltk confusion matrix')
+sn.heatmap(df_cm, annot=True, fmt='g')
+plt.title('nltk confusion matrix_'+str(np.sum(array_nltk)))
 plt.show()
 
-df_cm = pd.DataFrame(array_spacy, index=[i for i in list(set(flat_list_spacy))],
-                     columns=[i for i in list(set(flat_list_spacy))])
+df_cm = pd.DataFrame(array_spacy, index=[i for i in list(set(flat_list_gt))],
+                     columns=[i for i in list(set(flat_list_gt))])
 plt.figure(figsize=(10, 7))
-sn.heatmap(df_cm, annot=True)
-plt.title('spacy confusion matrix')
+sn.heatmap(df_cm, annot=True, fmt='g')
+plt.title('spacy confusion matrix_'+str(np.sum(array_spacy)))
 plt.show()
 
-df_cm = pd.DataFrame(array_stanza, index=[i for i in list(set(flat_list_stanza))],
-                     columns=[i for i in list(set(flat_list_stanza))])
+df_cm = pd.DataFrame(array_stanza, index=[i for i in list(set(flat_list_gt))],
+                     columns=[i for i in list(set(flat_list_gt))])
 plt.figure(figsize=(10, 7))
-sn.heatmap(df_cm, annot=True)
-plt.title('stanza confusion matrix')
+sn.heatmap(df_cm, annot=True, fmt='g')
+plt.title('stanza confusion matrix_'+str(np.sum(array_stanza)))
 plt.show()

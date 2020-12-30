@@ -100,7 +100,7 @@
     "V": "VERB",
     "^": "PROPN",
     "G": "PUNCT/SYM",
-    "!": "INTJ",
+    "!": "PUNCT/SYM",
     "T": "PART",
     "X": "DET",
     ",": "PUNCT/SYM",

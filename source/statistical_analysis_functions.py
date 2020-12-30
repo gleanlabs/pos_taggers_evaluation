@@ -64,12 +64,11 @@ def chart_4_agree_same_GT_what_is_the_other_library():
                     if val != x[1]]][0], axis=1)
     df_pos_exp['library_other'] = df_pos_exp[['votes', 'GT']].apply(
         lambda x: ' '.join([LIST_PACKAGES[index_other_lib] for index_other_lib in
-                   [index for index, val in enumerate([i[1] for i in ast.literal_eval('[' + x[0][1:-1] + ']')])
-                    if val != x[1]]][0]), axis=1)
+                            [index for index, val in enumerate([i[1] for i in ast.literal_eval('[' + x[0][1:-1] + ']')])
+                             if val != x[1]]][0]), axis=1)
     ax = sns.countplot(x="lib_equals_GT", data=df_pos_exp)
     plt.show()
     df_pos_exp.to_csv(os.path.join(THIS_FOLDER, 'source/utils/sentences_4_agree_same_GT.csv'))
-
 
 
 def df_tokens_3_agree_2_unique_and_different_GT():
@@ -246,7 +245,29 @@ def revewing_dataset():
                     new_tagging.append(("###" + tok_gt[0], tok_gt[1]))
                     votes.append(("###" + tok_gt[0], tok_votes[2]))
                 else:
-                    new_tagging.append((tok_gt[0], tok_votes[3]))
+                    map = {"&": "CCONJ",
+                           "$": "NUM",
+                           "D": "DET",
+                           "P": "SCONJ/ADP",
+                           "A": "ADJ",
+                           "N": "NOUN",
+                           "O": "PRON",
+                           "R": "ADV",
+                           "V": "VERB",
+                           "^": "PROPN",
+                           "G": "PUNCT/SYM",
+                           "G": "PUNCT",
+                           "!": "INTJ",
+                           "T": "PART",
+                           "X": "DET",
+                           "Z": "Z",
+                           "S": "S",
+                           "L": "L",
+                           "M": "M",
+                           "Y": "Y"}
+                    inv_map = {v: k for k, v in map.items()}
+                    new_tagging.append(
+                        (tok_gt[0], [inv_map[tok_votes[3][1]] if tok_votes[3][1] in inv_map else tok_votes[3][1]][0]))
             elif (tok_votes[4] == 1):
                 new_tagging.append((tok_gt[0], tok_gt[1]))
                 votes.append((tok_gt[0], tok_gt[1]))
@@ -264,5 +285,5 @@ def revewing_dataset():
     print(nb1)
     print(nb2)
     print(df_pos)
-    df_pos[['sentence', 'new_tagging','votes']].to_csv(
+    df_pos[['sentence', 'new_tagging', 'votes']].to_csv(
         os.path.join(THIS_FOLDER, 'source/utils/reviewing_dataset_Johanna.csv'))
