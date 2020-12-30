@@ -10,13 +10,13 @@ because usually thr GT is right in this case)
 
 ![alt text](source/utils/chart_4_agree.png)
 
-First, we can see that spacy tends to be different and agree with the GT against the other libraries. First of all, it's the only library using
+First, we can see that spacy tends to be different and agree with the GT against the other libraries. It's the only library using
 the universal tagging so this situation itself can introduce a bias, and the mapping I am using as well.
 From my reviewing, the 4 votes are often true but I found some examples where stanza is the remaining one and it's true (for example 
-"decoding" in the sentence "URL decoding in Javascript" is an example), same for spacy. Even if these are few cases I would quickly review 
-them (that's what I will do)
+"decoding" in the sentence "URL decoding in Javascript" is an example), same for spacy and flair. Even if these are few cases I would quickly review 
+the tokens here (that's what I will do). 
 
-- When 3 agree, there are 2 uniques votes given and the GT is different and agrees with an other library: usually it agrees with spacy (and usually the combinison 
+- When 3 agree, there are 2 uniques votes given and the GT is different and agrees with an other library: usually it agrees with spacy (and usually the combinaison 
 nltk-stanza-flair is right but it's worth reviewing), when it agrees with flair the GT usually seems always right, when it agrees with nltk the GT is usually wrong 
 and with stanza usually the GT is true (it was checked on a sample)
 ==> I'll review the cases here
