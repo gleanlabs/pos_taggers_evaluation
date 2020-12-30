@@ -46,3 +46,9 @@ and with stanza usually the GT is true (it was checked on a sample)
 ![alt text](source/utils/2_agree_3_unique_different_GT.png)
 
 - all the libraries disagree: few cases - garbbage:  we take theGT
+
+
+After taking into account some of the recommendations here, we reduce the number of tokens to around 9.000, and Basel did 5.285 of them (I 
+still have to do around 4.000). Let's go!
+
+Next step: the report regarding the libraries performances
