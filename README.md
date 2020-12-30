@@ -6,7 +6,7 @@ First of all, some figures: around 47.000 in total over the 1007 sentences. Only
 because usually thr GT is right in this case)
 ===> it's around 2.000 cases
 
-- When 4 agree including the GT and an other library gives an other vote : here is the repartition of libraries agreeing with the GT:
+- When 4 agree including the GT and an other library gives an other vote : here is the repartition of libraries agreeing with the GT (count being the number of tokens where the axis case happened):
 
 ![alt text](source/utils/chart_4_agree.png)
 
