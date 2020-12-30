@@ -17,7 +17,6 @@ ARTICLE_TO_UNIVERSAL_MAP = dict([
     ("X", "DET"), (",", "PUNCT")
 ])
 
-df_pos['GT'] = df_pos['GT'].apply(lambda x: [ARTICLE_TO_UNIVERSAL_MAP[i] if i in ARTICLE_TO_UNIVERSAL_MAP else "[UNK]"for i in ast.literal_eval(x)])
 PENN_TREEBANK_TO_UNIVERSAL_MAP = dict([
     ("CC", "CONJ"), ("CD", "NUM"), ("DT", "DET"), ("PDT", "DET"), ("FW", "X"), ("IN", "SCONJ/ADP"), ("JJ", "ADJ"),
     ("JJR", "ADJ"),
@@ -163,4 +162,31 @@ df_final = pd.DataFrame(np.array([[np.sum(df['nltk_nb_good_predictions']) / np.s
                         columns=['all tokens', 'nouns_recall', 'nouns_precision', 'nouns_accuracy'],
                         index=['nltk', 'spacy', 'stanza'])
 
+
+
+
 df_final.to_csv('final.csv')
+from sklearn.metrics import confusion_matrix
+y_true = ["cat", "ant", "cat", "cat", "ant", "bird"]
+y_pred = ["ant", "ant", "cat", "cat", "ant", "cat"]
+confusion_matrix(y_true, y_pred, labels=["ant", "bird", "cat"])
+
+
+import seaborn as sn
+import pandas as pd
+import matplotlib.pyplot as plt
+array = [[33,2,0,0,0,0,0,0,0,1,3],
+        [3,31,0,0,0,0,0,0,0,0,0],
+        [0,4,41,0,0,0,0,0,0,0,1],
+        [0,1,0,30,0,6,0,0,0,0,1],
+        [0,0,0,0,38,10,0,0,0,0,0],
+        [0,0,0,3,1,39,0,0,0,0,4],
+        [0,2,2,0,4,1,31,0,0,0,2],
+        [0,1,0,0,0,0,0,36,0,2,0],
+        [0,0,0,0,0,0,1,5,37,5,1],
+        [3,0,0,0,0,0,0,0,0,39,0],
+        [0,0,0,0,0,0,0,0,0,0,38]]
+df_cm = pd.DataFrame(array, index = [i for i in "ABCDEFGHIJK"],
+                  columns = [i for i in "ABCDEFGHIJK"])
+plt.figure(figsize = (10,7))
+sn.heatmap(df_cm, annot=True)

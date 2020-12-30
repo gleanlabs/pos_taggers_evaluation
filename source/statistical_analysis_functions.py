@@ -264,5 +264,5 @@ def revewing_dataset():
     print(nb1)
     print(nb2)
     print(df_pos)
-    df_pos[['sentence', 'new_tagging']].to_csv(
+    df_pos[['sentence', 'new_tagging','votes']].to_csv(
         os.path.join(THIS_FOLDER, 'source/utils/reviewing_dataset.csv'))
