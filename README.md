@@ -6,13 +6,13 @@ First of all, some figures: around 47.000 in total over the 1007 sentences. Only
 because usually thr GT is right in this case)
 ===> it's around 2.000 cases
 
-- When 4 agree including the GT and an other library gives an other vote : here is the repartition of libraries agreeing with the GT:
+- When 4 agree including the GT and an other library gives an other vote : here is the repartition of libraries agreeing with the GT (count being the number of tokens where the axis case happened):
 
 ![alt text](source/utils/chart_4_agree.png)
 
 First, we can see that spacy tends to be different and agree with the GT against the other libraries. It's the only library using
 the universal tagging so this situation itself can introduce a bias, and the mapping I am using as well.
-From my reviewing, the 4 votes are often true but I found some examples where stanza is the remaining one and it's true (for example 
+From my reviewing (I review mainly disagreements VERB/NOUN-PROPN), the 4 votes are often true but I found some examples where stanza is the remaining one and it's true (for example 
 "decoding" in the sentence "URL decoding in Javascript" is an example), same for spacy and flair. Even if these are few cases I would quickly review 
 the tokens here (that's what I will do). 
 
