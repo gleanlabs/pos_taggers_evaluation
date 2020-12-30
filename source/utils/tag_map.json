@@ -2,7 +2,7 @@
   "UNIV": {
     "ADP": "SCONJ/ADP",
     "SCONJ": "SCONJ/ADP",
-    "CCONJ": "CONJ",
+    "CCONJ": "CCONJ",
     "NUM": "NUM",
     ":": "PUNCT/SYM",
     ".": "PUNCT/SYM",
