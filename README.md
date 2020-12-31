@@ -52,3 +52,35 @@ After taking into account some of the recommendations here, we reduce the number
 still have to do around 4.000). Let's go!
 
 Next step: the report regarding the libraries performances
+
+
+REPORT:
+
+---------- all tokens:
+
+- confusion matrices:
+
+![alt text](source/utils/nltk_all_tokens_confusion_matrix.png)
+![alt text](source/utils/spacy_all_tokens_confusion_matrix.png)
+![alt text](source/utils/stanza_all_tokens_confusion_matrix.png)
+
+- classification reports:
+
+![alt text](source/utils/nltk_all_tokens_classification_report.png)
+![alt text](source/utils/spacy_all_tokens_classification_report.png)
+![alt text](source/utils/stanza_all_tokens_classification_report.png)
+
+---------- difficult tokens: tokens where there is a disagreement in all 3 libraries (could be considered as 
+the hardest to classify, and also those allowing to see the difference in the 3 libraries performances)
+
+- confusion matrices:
+
+![alt text](source/utils/nltk_difficult_tokens_confusion_matrix.png)
+![alt text](source/utils/spacy_difficult_tokens_confusion_matrix.png)
+![alt text](source/utils/stanza_difficult_tokens_confusion_matrix.png)
+
+- classification reports:
+
+![alt text](source/utils/nltk_difficult_tokens_classification_report.png)
+![alt text](source/utils/spacy_difficult_tokens_classification_report.png)
+![alt text](source/utils/stanza_difficult_tokens_classification_report.png)

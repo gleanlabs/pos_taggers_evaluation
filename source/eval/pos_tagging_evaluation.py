@@ -2,12 +2,13 @@ import spacy
 from source.tag_pos import _read_tag_map, map_results_to_universal_tags, _pos_tag_sentence
 from source.pos_taggers_functions import split_labels_articles_that_need_to, _split_composite_pos_tokens
 import nltk
-
+import os
 spacy.load('en_core_web_sm')
 import pandas as pd
 import numpy as np
 import ast
 from sklearn.metrics import classification_report
+THIS_FOLDER = "/Users/johanna/Desktop/pos_taggers_evaluation/pos_taggers_evaluation/"
 
 # df_Jo  = pd.read_csv('reviewing_dataset_Johanna.csv')
 # df_Basel  = pd.read_csv('sentences_to_GT_POS_corrected_Basel.csv')
@@ -17,50 +18,53 @@ from sklearn.metrics import classification_report
 #
 # df_Basel.to_csv('sentences_to_GT_POS_corrected_Basel_Jo.csv')
 
+#
+# df = pd.read_csv('sentences_to_GT_POS_corrected_Basel.csv')
+# mapping = _read_tag_map()
+# dict_mapping = mapping['ARTICLE-UNIV']
+# df['GT'] = df[['sentence', 'GT_POS']].apply(
+#     lambda x: [dict_mapping[gt] for gt in split_labels_articles_that_need_to(
+#         [(i, j) for i, j in
+#          zip([item for sublist in [text.split(' ') for text in nltk.sent_tokenize(x[0])] for item in sublist],
+#              ast.literal_eval(x[1]))])], axis=1)
+# print('GT')
+# print(df['GT'])
+#
+# # nltk
+# df['nltk'] = df['sentence'].apply(
+#     lambda x: [i[1] for i in map_results_to_universal_tags(_pos_tag_sentence('nltk', x), 'nltk')])
+# print('nltk')
+#
+# df['same'] = df[['GT', 'nltk']].apply(lambda x: 1 if len(x[0]) == len(x[1]) else 0, axis=1)
+# df = df[df.same == 1]
+# print(len([item for sublist in df['nltk'].tolist() for item in sublist]))
+# print(len([item for sublist in df['GT'].tolist() for item in sublist]))
+# print(len([item for sublist in df['nltk'].tolist() for item in sublist if item == "PROPN"]))
+#
+# # stanza
+# df['stanza'] = df['sentence'].apply(
+#     lambda x: [i[1] for i in map_results_to_universal_tags(_pos_tag_sentence('stanza', x), 'stanza')])
+# print('stanza')
+# print(len([item for sublist in df['stanza'].tolist() for item in sublist]))
+# df['same'] = df[['GT', 'stanza']].apply(lambda x: 1 if len(x[0]) == len(x[1]) else 0, axis=1)
+# df = df[df.same == 1]
+#
+# # spacy
+# df['spacy'] = df['sentence'].apply(
+#     lambda x: [i[1] for i in map_results_to_universal_tags(_pos_tag_sentence('spacy', x), 'spacy')])
+# print('spacy')
+#
+# df['same'] = df[['GT', 'spacy']].apply(lambda x: 1 if len(x[0]) == len(x[1]) else 0, axis=1)
+# df = df[df.same == 1]
+#
+# print(len([item for sublist in df['spacy'].tolist() for item in sublist]))
+#
+# df.to_csv('test_set_pos_tagging.csv')
+#
+#
+#
 
-df = pd.read_csv('sentences_to_GT_POS_corrected_Basel.csv')
-mapping = _read_tag_map()
-dict_mapping = mapping['ARTICLE-UNIV']
-df['GT'] = df[['sentence', 'GT_POS']].apply(
-    lambda x: [dict_mapping[gt] for gt in split_labels_articles_that_need_to(
-        [(i, j) for i, j in
-         zip([item for sublist in [text.split(' ') for text in nltk.sent_tokenize(x[0])] for item in sublist],
-             ast.literal_eval(x[1]))])], axis=1)
-print('GT')
-print(df['GT'])
-
-# nltk
-df['nltk'] = df['sentence'].apply(
-    lambda x: [i[1] for i in map_results_to_universal_tags(_pos_tag_sentence('nltk', x), 'nltk')])
-print('nltk')
-
-df['same'] = df[['GT', 'nltk']].apply(lambda x: 1 if len(x[0]) == len(x[1]) else 0, axis=1)
-df = df[df.same == 1]
-print(len([item for sublist in df['nltk'].tolist() for item in sublist]))
-print(len([item for sublist in df['GT'].tolist() for item in sublist]))
-
-# stanza
-df['stanza'] = df['sentence'].apply(
-    lambda x: [i[1] for i in map_results_to_universal_tags(_pos_tag_sentence('stanza', x), 'stanza')])
-print('stanza')
-print(len([item for sublist in df['stanza'].tolist() for item in sublist]))
-df['same'] = df[['GT', 'stanza']].apply(lambda x: 1 if len(x[0]) == len(x[1]) else 0, axis=1)
-df = df[df.same == 1]
-
-# spacy
-df['spacy'] = df['sentence'].apply(
-    lambda x: [i[1] for i in map_results_to_universal_tags(_pos_tag_sentence('spacy', x), 'spacy')])
-print('spacy')
-
-df['same'] = df[['GT', 'spacy']].apply(lambda x: 1 if len(x[0]) == len(x[1]) else 0, axis=1)
-df = df[df.same == 1]
-
-print(len([item for sublist in df['spacy'].tolist() for item in sublist]))
-
-df.to_csv('test_set_pos_tagging.csv')
-
-
-df = pd.read_csv('test_set_pos_tagging.csv')[500:]
+df = pd.read_csv(os.path.join(THIS_FOLDER, 'source/eval/test_set_pos_tagging.csv'))[500:]
 
 df['nltk'] = df['nltk'].apply(lambda x: ast.literal_eval(x))
 df['spacy'] = df['spacy'].apply(lambda x: ast.literal_eval(x))
@@ -138,7 +142,7 @@ print(classification_report(flat_list_gt, flat_list_stanza,  labels=list(set(fla
 
 
 # why PUNCT/SYM being predicted PROPN
-
+#
 # df = pd.read_csv('test_set_pos_tagging.csv')[500:]
 #
 # df['nltk'] = df['nltk'].apply(lambda x: ast.literal_eval(x))
@@ -147,7 +151,7 @@ print(classification_report(flat_list_gt, flat_list_stanza,  labels=list(set(fla
 # df['GT'] = df['GT'].apply(lambda x: ast.literal_eval(x))
 #
 # df['agree'] = df[['nltk', 'GT']].apply(
-#     lambda x: [1 if (nl == 'PROPN' and gt == 'PUNCT/SYM') else 0 for nl, gt in zip(x[0], x[1])], axis=1)
+#     lambda x: [1 if (nl != 'PROPN/NOUN' and gt == 'PROPN/NOUN') else 0 for nl, gt in zip(x[0], x[1])], axis=1)
 #
 # df['gt_tok'] = df['sentence'].apply(
 #     lambda x: [item for sublist in [_split_composite_pos_tokens(text.split(' ')) for text in nltk.sent_tokenize(x)] for
