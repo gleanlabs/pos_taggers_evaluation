@@ -1,4 +1,4 @@
-from files.helper_maps import *
+from files_Basel.helper_maps import *
 
 import json
 import pandas as pd
@@ -116,7 +116,7 @@ def main():
 	return result_dict_so_far
 
 
-def create_csv_GT_table(list_of_tuples, output_path="sentences_to_GT_POS.csv", list_of_column_names=['Sentence', 'GT_POS'], index_name=""):
+def create_csv_GT_table(list_of_tuples, output_path="sentences_to_GT_POS_corrected_Basel.csv", list_of_column_names=['Sentence', 'GT_POS'], index_name=""):
 	# make groundtruth dataframe
 	df = pd.DataFrame(list_of_tuples, columns=list_of_column_names)
 	if index_name:
