@@ -3,6 +3,7 @@ Script for running pos tagging and comparing results.
 """
 
 from source.statistical_analysis_functions import *
+from source.eval.pos_tagging_evaluation import evaluation
 
 if __name__ == "__main__":
     # create_df_all_sentences()
@@ -23,8 +24,6 @@ if __name__ == "__main__":
     # df_tokens_2_agree_3_unique_and_same_GT()
     # chart_2_agree_same_GT_which_libraries_tends_to_agree_with_each_other()
     # df_tokens_1_agree()
-    revewing_dataset()
+    # revewing_dataset()
 
-
-
-    # print(58+382+190+338+113+1410+824+844+285+2140)
+    evaluation('source/eval/sentences_to_GT_POS_corrected.csv')

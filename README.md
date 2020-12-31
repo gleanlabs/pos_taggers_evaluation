@@ -90,3 +90,8 @@ the hardest to classify, and also those allowing to see the difference in the 3 
 
 In terms of PROPN/NOUN for difficult tokens, spacy is 1.63x better than nltk and stanza is 2.09x  
 better than nltk. Also, stanza is 1.27x better than spacy. 
+
+Also the time report for extracting keyphrases on the entire stackoverflow/stackexchanges data for 
+the different libraries: around 2.5 hours for nltk, 13 hours for spacy and 22 hours for stanza (reduced to 20 hours for 
+now when using batches)
+![alt text](source/utils/time_report.png)

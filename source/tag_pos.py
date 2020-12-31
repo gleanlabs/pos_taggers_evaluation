@@ -25,7 +25,7 @@ def _pos_tag_sentence(package_name: str, doc: str):
     if pos_tagger == 'flair':
         return (flair_pos_fct(tokenize(doc)))
     if pos_tagger == 'article':
-        return (article_gt(doc))
+        return (article_gt(doc, os.path.join(THIS_FOLDER, 'source/eval/sentences_to_GT_POS_corrected.csv')))
     return res
 
 

@@ -57,8 +57,8 @@ def split_labels_articles_that_need_to(gt):
     return list(itertools.chain.from_iterable(new_labels))
 
 
-def article_gt(sent: list):
-    df_pos = pd.read_csv(os.path.join(THIS_FOLDER, 'source/utils/sentences_to_GT_POS.csv'))
+def article_gt(sent: list, file):
+    df_pos = pd.read_csv(os.path.join(THIS_FOLDER, file))
     gt = split_labels_articles_that_need_to(df_pos[df_pos.sentence == sent]['tagged_tokens_GT'].apply(
         lambda x: ast.literal_eval(x)).tolist()[0])
     sent_tok = _split_composite_pos_tokens(df_pos[df_pos.sentence == sent]['tagged_tokens_GT'].apply(
