@@ -1,5 +1,5 @@
-from files.helper_maps import ARTICLE_TO_HUMAN_MAP
-from files.new_funcs_updated import write_to_json, transform_golden, create_csv_GT_table
+from files_Basel.helper_maps import ARTICLE_TO_HUMAN_MAP
+from files_Basel.new_funcs_updated import write_to_json, transform_golden, create_csv_GT_table
 
 
 def get_dataset_from_files(list_of_GT_paths):

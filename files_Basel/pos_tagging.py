@@ -31,7 +31,7 @@ UNIVERSAL_MAP = dict([
 ])
 sentences = ['URL decoding in Javascript', 'How to register a JavaScript callback in a Java Applet ?',
              'I would not disagree with this .',
-             'You can deploy both WARs in the same EAR and put common resources in the EAR . Then put the appropriate dependencies in the manifest of the web apps to link to the jar files in the ear .',
+             'You can deploy both WARs in the same EAR and put common resources in the EAR . Then put the appropriate dependencies in the manifest of the web apps to link to the jar files_Basel in the ear .',
              'Which JavaScript library you recommend to use with Java EE + Struts + iBatis ?']
 sentences_gt = [["^", "V", "P", "^"], ["R", "P", "V", "D", "^", "N", "P", "D", "^", "N", ","],
                 ["O", "V", "R", "V", "P", "D", ","],
