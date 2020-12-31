@@ -70,6 +70,9 @@ REPORT:
 ![alt text](source/utils/spacy_all_tokens_classification_report.png)
 ![alt text](source/utils/stanza_all_tokens_classification_report.png)
 
+In terms of PROPN/NOUN, spacy is 1.05x better than nltk and stanza is 1.07x  
+better than nltk. Also, stanza is 1.02x better than spacy. 
+
 ---------- difficult tokens: tokens where there is a disagreement in all 3 libraries (could be considered as 
 the hardest to classify, and also those allowing to see the difference in the 3 libraries performances)
 
@@ -84,3 +87,6 @@ the hardest to classify, and also those allowing to see the difference in the 3 
 ![alt text](source/utils/nltk_difficult_tokens_classification_report.png)
 ![alt text](source/utils/spacy_difficult_tokens_classification_report.png)
 ![alt text](source/utils/stanza_difficult_tokens_classification_report.png)
+
+In terms of PROPN/NOUN for difficult tokens, spacy is 1.63x better than nltk and stanza is 2.09x  
+better than nltk. Also, stanza is 1.27x better than spacy. 
