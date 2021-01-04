@@ -5,9 +5,9 @@ from matplotlib import pyplot as plt
 import statsmodels.api as sm
 from statsmodels.stats.outliers_influence import summary_table
 fig, ax = plt.subplots(figsize=(8,6))
-Clrs = ['k','g','r']
-for j,i in enumerate(['stanza']):
-    df = pd.read_csv('/Users/johanna/Desktop/{}_time_final.csv'.format(i))
+Clrs = ['g','r']
+for j,i in enumerate(['stanza' ,'spacy']):
+    df = pd.read_csv('/Users/johanna/Desktop/{}_time_pandas_udfs.csv'.format(i))
     print(df)
 
     x = np.linspace(0,10)
